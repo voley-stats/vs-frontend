@@ -1,0 +1,212 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+const MatchLibrary = () => {
+  const [filters, setFilters] = useState({
+    date: '',
+    team: '',
+    status: ''
+  });
+
+  const matches = [
+    {
+      id: 1,
+      teams: 'Equipo A vs Equipo B',
+      date: '2024-01-15',
+      tournament: 'Liga Nacional 2024',
+      status: 'Procesado',
+      score: '3-1',
+      duration: '2h 15min',
+      actions: 45
+    },
+    {
+      id: 2,
+      teams: 'Equipo C vs Equipo D',
+      date: '2024-01-14',
+      tournament: 'Copa Regional',
+      status: 'Pendiente',
+      score: '-',
+      duration: '-',
+      actions: 0
+    },
+    {
+      id: 3,
+      teams: 'Equipo E vs Equipo F',
+      date: '2024-01-13',
+      tournament: 'Liga Nacional 2024',
+      status: 'Procesado',
+      score: '3-2',
+      duration: '2h 45min',
+      actions: 52
+    },
+    {
+      id: 4,
+      teams: 'Equipo G vs Equipo H',
+      date: '2024-01-12',
+      tournament: 'Torneo Juvenil',
+      status: 'Procesado',
+      score: '3-0',
+      duration: '1h 30min',
+      actions: 28
+    }
+  ];
+
+  const filteredMatches = matches.filter(match => {
+    return (
+      (!filters.date || match.date.includes(filters.date)) &&
+      (!filters.team || match.teams.toLowerCase().includes(filters.team.toLowerCase())) &&
+      (!filters.status || match.status === filters.status)
+    );
+  });
+
+  const handleFilterChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-background-light dark:bg-background-dark">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            Biblioteca de Partidos
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400">
+            Gestiona y accede a todos tus partidos analizados
+          </p>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white dark:bg-slate-900/50 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+            Filtros
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="date-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Fecha
+              </label>
+              <input
+                type="date"
+                id="date-filter"
+                name="date"
+                value={filters.date}
+                onChange={handleFilterChange}
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="team-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Equipo
+              </label>
+              <input
+                type="text"
+                id="team-filter"
+                name="team"
+                value={filters.team}
+                onChange={handleFilterChange}
+                placeholder="Buscar por equipo..."
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="status-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Estado
+              </label>
+              <select
+                id="status-filter"
+                name="status"
+                value={filters.status}
+                onChange={handleFilterChange}
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              >
+                <option value="">Todos los estados</option>
+                <option value="Procesado">Procesado</option>
+                <option value="Pendiente">Pendiente</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Matches List */}
+        <div className="bg-white dark:bg-slate-900/50 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+          <div className="p-6 border-b border-slate-200/80 dark:border-slate-800/80">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              Partidos ({filteredMatches.length})
+            </h2>
+          </div>
+          
+          <div className="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+            {filteredMatches.map((match) => (
+              <div key={match.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-4 mb-2">
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                        {match.teams}
+                      </h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        match.status === 'Procesado' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                      }`}>
+                        {match.status}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 dark:text-slate-400">
+                      <div>
+                        <span className="font-medium">Fecha:</span> {match.date}
+                      </div>
+                      <div>
+                        <span className="font-medium">Torneo:</span> {match.tournament}
+                      </div>
+                      <div>
+                        <span className="font-medium">Duración:</span> {match.duration}
+                      </div>
+                      <div>
+                        <span className="font-medium">Acciones:</span> {match.actions}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {match.score}
+                      </div>
+                    </div>
+                    
+                    {match.status === 'Procesado' ? (
+                      <Link
+                        to={`/stats/${match.id}`}
+                        className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                      >
+                        <span className="material-symbols-outlined mr-2">visibility</span>
+                        Ver Análisis
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        className="inline-flex items-center px-4 py-2 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 rounded-md cursor-not-allowed"
+                      >
+                        <span className="material-symbols-outlined mr-2">schedule</span>
+                        Procesando...
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MatchLibrary;
