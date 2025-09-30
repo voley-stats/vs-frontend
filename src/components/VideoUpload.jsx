@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { matchService } from '../services/matchService';
+import { videoService } from '../services/videoService';
 
 const VideoUpload = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     videoFile: null,
-    date: '',
-    homeTeam: '',
-    awayTeam: '',
+    match_date: '',
+    home_team: '',
+    away_team: '',
     tournament: '',
+    season: '',
     description: ''
   });
 
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -23,12 +29,37 @@ const VideoUpload = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUploading(true);
-    
-    // Simular carga
-    setTimeout(() => {
+    setError('');
+
+    try {
+      // Primero crear el partido
+      const matchData = {
+        home_team: formData.home_team,
+        away_team: formData.away_team,
+        match_date: formData.match_date,
+        tournament: formData.tournament,
+        season: formData.season,
+        description: formData.description
+      };
+
+      const matchResult = await matchService.createMatch(matchData);
+      const matchId = matchResult.match.id;
+
+      // Luego subir el video si existe
+      if (formData.videoFile) {
+        await videoService.uploadVideo(matchId, formData.videoFile, {
+          title: `${formData.home_team} vs ${formData.away_team}`,
+          description: formData.description
+        });
+      }
+
+      // Redirigir al dashboard
+      navigate('/');
+    } catch (err) {
+      setError(err.message || 'Error subiendo el video');
+    } finally {
       setIsUploading(false);
-      alert('Video cargado exitosamente. El análisis comenzará en breve.');
-    }, 2000);
+    }
   };
 
   return (
@@ -79,14 +110,14 @@ const VideoUpload = () => {
             {/* Metadata Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label htmlFor="match_date" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Fecha del Partido
                 </label>
                 <input
                   type="date"
-                  id="date"
-                  name="date"
-                  value={formData.date}
+                  id="match_date"
+                  name="match_date"
+                  value={formData.match_date}
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
@@ -109,32 +140,52 @@ const VideoUpload = () => {
               </div>
 
               <div>
-                <label htmlFor="homeTeam" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Equipo Local
+                <label htmlFor="season" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Temporada
+                </label>
+                <select
+                  id="season"
+                  name="season"
+                  value={formData.season}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                >
+                  <option value="">Seleccionar temporada</option>
+                  <option value="apertura">Apertura</option>
+                  <option value="clausura">Clausura</option>
+                  <option value="liga">Liga</option>
+                  <option value="copa">Copa</option>
+                  <option value="playoff">Playoff</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="home_team" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Equipo a Analizar
                 </label>
                 <input
                   type="text"
-                  id="homeTeam"
-                  name="homeTeam"
-                  value={formData.homeTeam}
+                  id="home_team"
+                  name="home_team"
+                  value={formData.home_team}
                   onChange={handleChange}
-                  placeholder="Nombre del equipo local"
+                  placeholder="Nombre del equipo a analizar"
                   required
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
-                <label htmlFor="awayTeam" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Equipo Visitante
+                <label htmlFor="away_team" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Equipo Rival
                 </label>
                 <input
                   type="text"
-                  id="awayTeam"
-                  name="awayTeam"
-                  value={formData.awayTeam}
+                  id="away_team"
+                  name="away_team"
+                  value={formData.away_team}
                   onChange={handleChange}
-                  placeholder="Nombre del equipo visitante"
+                  placeholder="Nombre del equipo rival"
                   required
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
@@ -156,10 +207,17 @@ const VideoUpload = () => {
               />
             </div>
 
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
             {/* Submit Button */}
             <div className="flex justify-end space-x-4">
               <button
                 type="button"
+                onClick={() => navigate('/')}
                 className="px-6 py-2 border border-slate-300 dark:border-slate-600 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Cancelar

@@ -1,15 +1,30 @@
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import VolleyballIcon from './VolleyballIcon';
+import { authService } from '../services/authService';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simular login exitoso
-    onLogin();
+    setLoading(true);
+    setError('');
+
+    try {
+      await login(formData);
+      // No forzar recarga, React manejará la navegación automáticamente
+    } catch (err) {
+      setError(err.message || 'Error en el login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -23,32 +38,37 @@ const Login = ({ onLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center">
-          <div className="w-16 h-16 text-primary mx-auto mb-4">
-            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <path clipRule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fillRule="evenodd"></path>
-            </svg>
+          <div className="w-16 h-16 mx-auto mb-4">
+            <VolleyballIcon className="w-16 h-16" />
           </div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white">VoleyStats</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             Inicia sesión para acceder a tu panel de análisis
           </p>
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">Credenciales de Prueba:</p>
+            <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+              <p><strong>Administrador:</strong> admin@voleystats.com / password</p>
+              <p><strong>Usuario:</strong> user@voleystats.com / password</p>
+            </div>
+          </div>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Usuario
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Email
               </label>
               <input
-                id="username"
-                name="username"
-                type="text"
+                id="email"
+                name="email"
+                type="email"
                 required
-                value={formData.username}
+                value={formData.email}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                placeholder="Ingresa tu usuario"
+                placeholder="Ingresa tu email"
               />
             </div>
             
@@ -77,12 +97,19 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
 
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Iniciar Sesión
+              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </button>
           </div>
         </form>
