@@ -1,13 +1,24 @@
 <!doctype html>
-<html class="dark" lang="es">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VoleyStats - Análisis de Partidos</title>
+    <title>VoleyStats - Análisis Inteligente de Voleibol</title>
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
     <link as="style" href="https://fonts.googleapis.com/css2?display=swap&family=Space+Grotesk:wght@400;500;700" onload="this.rel='stylesheet'" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+      // Aplicar tema por defecto solo si no hay usuario
+      (function() {
+        const user = localStorage.getItem('user');
+        if (!user) {
+          // Solo aplicar tema oscuro por defecto si no hay usuario
+          document.documentElement.classList.add('dark');
+        }
+        // Si hay usuario, el PreferencesContext se encargará de aplicar las preferencias
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

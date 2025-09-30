@@ -1,6 +1,6 @@
-# VolleyAI - Frontend
+# VoleyStats - Frontend
 
-Una aplicación web moderna para el análisis de partidos de voleibol con un diseño oscuro elegante y funcionalidades interactivas.
+Una aplicación web moderna para el análisis inteligente de partidos de voleibol con un diseño elegante inspirado en los colores del deporte y funcionalidades interactivas.
 
 ## 🚀 Características
 
@@ -72,9 +72,11 @@ Una aplicación web moderna para el análisis de partidos de voleibol con un dis
 
 ## 🎨 Paleta de Colores
 
-- **Primary**: #13a4ec (Azul principal)
+- **Primary**: #FF7F00 (Naranja intenso del balón)
+- **Primary Light**: #FFB300 (Amarillo anaranjado)
 - **Background Light**: #f6f7f8 (Fondo claro)
-- **Background Dark**: #101c22 (Fondo oscuro)
+- **Background Dark**: #3A3A3A (Gris oscuro elegante)
+- **Accent**: #FF7F00 (Acento principal)
 
 ## 📂 Estructura del Proyecto
 

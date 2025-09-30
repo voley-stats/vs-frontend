@@ -8,9 +8,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary": "#13a4ec",
+        "primary": "#FF7F00",
+        "primary-light": "#FFB300",
         "background-light": "#f6f7f8",
-        "background-dark": "#101c22",
+        "background-dark": "#3A3A3A",
+        "background-secondary": "#4A4A4A",
+        "text-primary": "#FFFFFF",
+        "text-secondary": "#E5E5E5",
+        "accent": "#FF7F00",
       },
       fontFamily: {
         "display": ["Space Grotesk", "sans-serif"]

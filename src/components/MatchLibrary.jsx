@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 
 const MatchLibrary = () => {
   const [filters, setFilters] = useState({
-    date: '',
+    dateFrom: '',
+    dateTo: '',
     team: '',
-    status: ''
+    status: '',
+    season: ''
   });
 
   const matches = [
@@ -14,6 +16,7 @@ const MatchLibrary = () => {
       teams: 'Equipo A vs Equipo B',
       date: '2024-01-15',
       tournament: 'Liga Nacional 2024',
+      season: 'Apertura',
       status: 'Procesado',
       score: '3-1',
       duration: '2h 15min',
@@ -24,6 +27,7 @@ const MatchLibrary = () => {
       teams: 'Equipo C vs Equipo D',
       date: '2024-01-14',
       tournament: 'Copa Regional',
+      season: 'Clausura',
       status: 'Pendiente',
       score: '-',
       duration: '-',
@@ -34,6 +38,7 @@ const MatchLibrary = () => {
       teams: 'Equipo E vs Equipo F',
       date: '2024-01-13',
       tournament: 'Liga Nacional 2024',
+      season: 'Apertura',
       status: 'Procesado',
       score: '3-2',
       duration: '2h 45min',
@@ -44,6 +49,7 @@ const MatchLibrary = () => {
       teams: 'Equipo G vs Equipo H',
       date: '2024-01-12',
       tournament: 'Torneo Juvenil',
+      season: 'Liga',
       status: 'Procesado',
       score: '3-0',
       duration: '1h 30min',
@@ -52,11 +58,13 @@ const MatchLibrary = () => {
   ];
 
   const filteredMatches = matches.filter(match => {
-    return (
-      (!filters.date || match.date.includes(filters.date)) &&
-      (!filters.team || match.teams.toLowerCase().includes(filters.team.toLowerCase())) &&
-      (!filters.status || match.status === filters.status)
-    );
+    const dateMatch = !filters.dateFrom || !filters.dateTo || 
+      (match.date >= filters.dateFrom && match.date <= filters.dateTo);
+    const teamMatch = !filters.team || match.teams.toLowerCase().includes(filters.team.toLowerCase());
+    const statusMatch = !filters.status || match.status === filters.status;
+    const seasonMatch = !filters.season || match.season === filters.season;
+    
+    return dateMatch && teamMatch && statusMatch && seasonMatch;
   });
 
   const handleFilterChange = (e) => {
@@ -83,16 +91,30 @@ const MatchLibrary = () => {
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
             Filtros
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="date-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Fecha
+              <label htmlFor="date-from-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Fecha Desde
               </label>
               <input
                 type="date"
-                id="date-filter"
-                name="date"
-                value={filters.date}
+                id="date-from-filter"
+                name="dateFrom"
+                value={filters.dateFrom}
+                onChange={handleFilterChange}
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="date-to-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Fecha Hasta
+              </label>
+              <input
+                type="date"
+                id="date-to-filter"
+                name="dateTo"
+                value={filters.dateTo}
                 onChange={handleFilterChange}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               />
@@ -111,6 +133,26 @@ const MatchLibrary = () => {
                 placeholder="Buscar por equipo..."
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               />
+            </div>
+            
+            <div>
+              <label htmlFor="season-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Temporada
+              </label>
+              <select
+                id="season-filter"
+                name="season"
+                value={filters.season}
+                onChange={handleFilterChange}
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              >
+                <option value="">Todas las temporadas</option>
+                <option value="Apertura">Apertura</option>
+                <option value="Clausura">Clausura</option>
+                <option value="Liga">Liga</option>
+                <option value="Copa">Copa</option>
+                <option value="Playoff">Playoff</option>
+              </select>
             </div>
             
             <div>
@@ -158,12 +200,15 @@ const MatchLibrary = () => {
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm text-slate-600 dark:text-slate-400">
                       <div>
                         <span className="font-medium">Fecha:</span> {match.date}
                       </div>
                       <div>
                         <span className="font-medium">Torneo:</span> {match.tournament}
+                      </div>
+                      <div>
+                        <span className="font-medium">Temporada:</span> {match.season}
                       </div>
                       <div>
                         <span className="font-medium">Duración:</span> {match.duration}
