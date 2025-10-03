@@ -23,7 +23,9 @@ const handleResponse = async (response) => {
 export const apiClient = {
   async get(url) {
     const response = await fetch(`${API_URL}${url}`, {
-      headers: getAuthHeaders()
+      method: 'GET',
+      headers: getAuthHeaders(),
+      credentials: 'include'
     });
     return handleResponse(response);
   },
@@ -32,7 +34,8 @@ export const apiClient = {
     const response = await fetch(`${API_URL}${url}`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      credentials: 'include'
     });
     return handleResponse(response);
   },
@@ -41,7 +44,8 @@ export const apiClient = {
     const response = await fetch(`${API_URL}${url}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      credentials: 'include'
     });
     return handleResponse(response);
   },
@@ -49,7 +53,8 @@ export const apiClient = {
   async delete(url) {
     const response = await fetch(`${API_URL}${url}`, {
       method: 'DELETE',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
+      credentials: 'include'
     });
     return handleResponse(response);
   },
@@ -61,7 +66,8 @@ export const apiClient = {
       headers: {
         ...(token && { 'Authorization': `Bearer ${token}` })
       },
-      body: formData
+      body: formData,
+      credentials: 'include'
     });
     return handleResponse(response);
   }
@@ -69,4 +75,4 @@ export const apiClient = {
 
 // Exportar como api para compatibilidad
 export default apiClient;
-export const api = apiClient;
+export { apiClient as api };

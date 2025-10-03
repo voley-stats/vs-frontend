@@ -1,32 +1,63 @@
-// Servicio de videos simulado
+import api from './api';
+
+// Servicio de videos con backend real
 export const videoService = {
   async uploadVideo(matchId, videoFile, metadata) {
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    return {
-      id: Date.now(),
-      match_id: matchId,
-      filename: videoFile.name,
-      status: 'uploading',
-      metadata
-    };
+    try {
+      const formData = new FormData();
+      formData.append('video', videoFile);
+      formData.append('title', metadata.title || '');
+      formData.append('description', metadata.description || '');
+
+      const response = await api.upload(`/videos/upload/${matchId}`, formData);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Error subiendo video');
+    }
   },
 
   async getVideos() {
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return {
-      videos: [
-        {
-          id: 1,
-          match_id: 1,
-          filename: 'partido_1.mp4',
-          status: 'processed',
-          created_at: '2024-01-15T10:00:00Z'
-        }
-      ]
-    };
+    try {
+      const response = await api.get('/videos');
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Error obteniendo videos');
+    }
+  },
+
+  async getVideoById(id) {
+    try {
+      const response = await api.get(`/videos/${id}`);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Error obteniendo video');
+    }
+  },
+
+  async getVideosByMatch(matchId) {
+    try {
+      const response = await api.get(`/videos/match/${matchId}`);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Error obteniendo videos del partido');
+    }
+  },
+
+  async deleteVideo(id) {
+    try {
+      const response = await api.delete(`/videos/${id}`);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Error eliminando video');
+    }
+  },
+
+  async getVideoStats() {
+    try {
+      const response = await api.get('/videos/stats/user');
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Error obteniendo estadísticas de videos');
+    }
   }
 };

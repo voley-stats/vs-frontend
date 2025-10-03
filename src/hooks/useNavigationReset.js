@@ -7,6 +7,11 @@ export const useNavigationReset = (user, loading) => {
   useEffect(() => {
     // Solo ejecutar cuando el usuario se autentica y no está cargando
     if (user && !loading) {
+      // NO redirigir si estamos en la pantalla de completar perfil
+      if (location.pathname === '/complete-profile') {
+        return;
+      }
+
       // Verificar si ya se hizo la redirección inicial para este usuario
       const hasRedirectedKey = `redirected_${user.id}`;
       const hasRedirected = localStorage.getItem(hasRedirectedKey);
@@ -27,8 +32,10 @@ export const useNavigationReset = (user, loading) => {
 
       // Lista de rutas válidas para cada tipo de usuario
       const validRoutes = {
-        admin: ['/', '/upload', '/library', '/admin', '/stats'],
-        user: ['/', '/upload', '/library', '/stats']
+        admin: ['/', '/upload', '/library', '/stats', '/settings', '/complete-profile', '/teams', '/profile'],
+        coach: ['/', '/upload', '/library', '/stats', '/settings', '/complete-profile', '/teams', '/profile'],
+        assistant: ['/', '/upload', '/library', '/stats', '/settings', '/profile'],
+        user: ['/', '/upload', '/library', '/stats', '/settings', '/profile']
       };
 
       const userRoutes = validRoutes[user.role] || validRoutes.user;

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Sidebar from './Sidebar';
+import BackButton from './BackButton';
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -179,7 +181,7 @@ const AdminPanel = () => {
               </label>
               <input
                 type="text"
-                defaultValue="VoleyStats"
+                defaultValue="VOLEY STATS"
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               />
             </div>
@@ -239,16 +241,24 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            Panel de Administración
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Bienvenido, {user?.name}. Gestiona tu plataforma VoleyStats.
-          </p>
-        </div>
+    <div className="flex h-screen bg-background-light dark:bg-background-dark">
+      {/* Sidebar */}
+      <Sidebar />
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            {/* Header con botón de retroceso */}
+            <div className="mb-8">
+              <BackButton to="/" className="mb-4" />
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Panel de Administración
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Bienvenido, {user?.name}. Gestiona tu plataforma VOLEY STATS.
+              </p>
+            </div>
 
         {/* Tabs */}
         <div className="bg-white dark:bg-slate-900/50 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80 mb-6">
@@ -272,8 +282,10 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        {/* Content */}
-        {renderContent()}
+            {/* Content */}
+            {renderContent()}
+          </div>
+        </div>
       </div>
     </div>
   );

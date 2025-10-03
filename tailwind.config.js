@@ -8,17 +8,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary": "#FF7F00",
-        "primary-light": "#FFB300",
-        "background-light": "#f6f7f8",
-        "background-dark": "#3A3A3A",
-        "background-secondary": "#4A4A4A",
-        "text-primary": "#FFFFFF",
-        "text-secondary": "#E5E5E5",
-        "accent": "#FF7F00",
+        "primary": "#FF7F00", // Naranja
+        "primary-light": "#FFB300", // Naranja claro
+        "secondary": "#FFD700", // Amarillo (solo si necesario)
+        "background-light": "#FFFFFF", // Blanco
+        "background-dark": "#000000", // Negro
+        "background-secondary": "#808080", // Gris
+        "text-primary": "#000000", // Negro
+        "text-secondary": "#808080", // Gris
+        "accent": "#FF7F00", // Naranja
+        "gray-light": "#F5F5F5", // Gris muy claro
+        "gray-medium": "#808080", // Gris medio
+        "gray-dark": "#333333", // Gris oscuro
       },
       fontFamily: {
-        "display": ["Space Grotesk", "sans-serif"]
+        "display": ["Space Grotesk", "sans-serif"],
+        "cy-grotesk": ["Inter", "sans-serif"]
       },
       borderRadius: {
         "DEFAULT": "0.25rem",

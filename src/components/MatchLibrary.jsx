@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import BackButton from './BackButton';
 
 const MatchLibrary = () => {
   const [filters, setFilters] = useState({
@@ -75,104 +76,19 @@ const MatchLibrary = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark">
+    <div className="flex-1 overflow-y-auto">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            Biblioteca de Partidos
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Gestiona y accede a todos tus partidos analizados
-          </p>
-        </div>
+            {/* Header con botón de retroceso */}
+            <div className="mb-8">
+              <BackButton to="/" className="mb-4" />
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Biblioteca de Partidos
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Gestiona y accede a todos tus partidos analizados
+              </p>
+            </div>
 
-        {/* Filters */}
-        <div className="bg-white dark:bg-slate-900/50 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-            Filtros
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="date-from-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Fecha Desde
-              </label>
-              <input
-                type="date"
-                id="date-from-filter"
-                name="dateFrom"
-                value={filters.dateFrom}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="date-to-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Fecha Hasta
-              </label>
-              <input
-                type="date"
-                id="date-to-filter"
-                name="dateTo"
-                value={filters.dateTo}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="team-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Equipo
-              </label>
-              <input
-                type="text"
-                id="team-filter"
-                name="team"
-                value={filters.team}
-                onChange={handleFilterChange}
-                placeholder="Buscar por equipo..."
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="season-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Temporada
-              </label>
-              <select
-                id="season-filter"
-                name="season"
-                value={filters.season}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
-                <option value="">Todas las temporadas</option>
-                <option value="Apertura">Apertura</option>
-                <option value="Clausura">Clausura</option>
-                <option value="Liga">Liga</option>
-                <option value="Copa">Copa</option>
-                <option value="Playoff">Playoff</option>
-              </select>
-            </div>
-            
-            <div>
-              <label htmlFor="status-filter" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Estado
-              </label>
-              <select
-                id="status-filter"
-                name="status"
-                value={filters.status}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
-                <option value="">Todos los estados</option>
-                <option value="Procesado">Procesado</option>
-                <option value="Pendiente">Pendiente</option>
-              </select>
-            </div>
-          </div>
-        </div>
 
         {/* Matches List */}
         <div className="bg-white dark:bg-slate-900/50 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">

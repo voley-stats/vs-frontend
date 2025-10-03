@@ -14,6 +14,7 @@ out/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
 
 # Logs
 logs
@@ -45,6 +46,7 @@ coverage/
 .rts2_cache_cjs/
 .rts2_cache_es/
 .rts2_cache_umd/
+.vite/
 
 # Optional REPL history
 .node_repl_history
@@ -61,6 +63,9 @@ coverage/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo
@@ -81,9 +86,20 @@ Desktop.ini
 *.temp
 
 # Package manager files
-package-lock.json
+# Note: Consider keeping package-lock.json for consistency
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Storybook
+storybook-static/
 
 # VoleyStats specific
 # User preferences and session data (sensitive)
@@ -97,6 +113,7 @@ user_preferences
 *.key
 *.pem
 secrets.json
+config/secrets/
 
 # Database files (if using local DB)
 *.db
@@ -106,7 +123,25 @@ secrets.json
 # Upload directories (if any)
 uploads/
 temp-uploads/
+public/uploads/
 
 # Backup files
 *.bak
 *.backup
+
+# IDE and editor files
+*.sublime-project
+*.sublime-workspace
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local development
+.local/
+local/
