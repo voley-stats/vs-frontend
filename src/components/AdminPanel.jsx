@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Sidebar from './Sidebar';
 import BackButton from './BackButton';
+import NotificationManagement from './NotificationManagement';
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ const AdminPanel = () => {
   const tabs = [
     { id: 'overview', label: 'Resumen', icon: 'dashboard' },
     { id: 'users', label: 'Usuarios', icon: 'people' },
+    { id: 'notifications', label: 'Notificaciones', icon: 'campaign' },
     { id: 'settings', label: 'Configuración', icon: 'settings' },
     { id: 'analytics', label: 'Analíticas', icon: 'analytics' }
   ];
@@ -233,6 +235,8 @@ const AdminPanel = () => {
         return renderOverview();
       case 'users':
         return renderUsers();
+      case 'notifications':
+        return <NotificationManagement />;
       case 'settings':
         return renderSettings();
       default:

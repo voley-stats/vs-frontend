@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PreferencesProvider } from './contexts/PreferencesContext';
+import { FiltersProvider } from './contexts/FiltersContext';
 import { useNavigationReset } from './hooks/useNavigationReset';
 import useScrollToTop from './hooks/useScrollToTop';
 import Layout from './components/Layout';
@@ -25,6 +26,8 @@ import UserProfilePage from './components/UserProfilePage';
 import LandingPage from './components/LandingPage';
 import Help from './components/Help';
 import Contact from './components/Contact';
+import Privacy from './components/Privacy';
+import Documentation from './components/Documentation';
 import LoadingSpinner from './components/LoadingSpinner';
 
 function AppContent() {
@@ -59,6 +62,8 @@ function AppContent() {
                <Route path="/reset-password/:token" element={<ResetPassword />} />
                <Route path="/help" element={<Help />} />
                <Route path="/contact" element={<Contact />} />
+               <Route path="/privacy" element={<Privacy />} />
+               <Route path="/docs" element={<Documentation />} />
                <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
@@ -139,9 +144,11 @@ function App() {
   return (
     <AuthProvider>
       <PreferencesProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <FiltersProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </FiltersProvider>
       </PreferencesProvider>
     </AuthProvider>
   );

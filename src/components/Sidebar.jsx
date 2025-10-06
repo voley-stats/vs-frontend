@@ -1,21 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useFilters } from '../contexts/FiltersContext';
 import VoleyStatsLogo from './VoleyStatsLogo';
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  
-  // Estado para filtros (solo cuando estamos en partidos)
-  const [filters, setFilters] = useState({
-    dateFrom: '',
-    dateTo: '',
-    team: '',
-    status: '',
-    season: ''
-  });
+  const { filters, updateFilters } = useFilters();
   
   // Detectar si estamos en la sección de partidos
   const isInMatchesSection = location.pathname === '/library';
@@ -91,7 +84,7 @@ const Sidebar = () => {
   };
 
   const handleFilterChange = (e) => {
-    setFilters({
+    updateFilters({
       ...filters,
       [e.target.name]: e.target.value
     });
