@@ -11,9 +11,9 @@ export const matchService = {
     }
   },
 
-  async getMatches() {
+  async getMatches(queryParams = '') {
     try {
-      const response = await api.get('/matches');
+      const response = await api.get(`/matches${queryParams}`);
       return response;
     } catch (error) {
       throw new Error(error.message || 'Error obteniendo partidos');

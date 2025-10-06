@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { matchService } from '../services/matchService';
+import NotificationIcon from './NotificationIcon';
 
 const Dashboard = () => {
   const [recentMatches, setRecentMatches] = useState([]);
@@ -48,14 +49,17 @@ const Dashboard = () => {
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-7xl mx-auto px-6 py-8">
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                Bienvenido a Voley Stats
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                Panel de control para análisis de partidos de voleibol
-              </p>
+            {/* Header con icono de notificaciones */}
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                  Bienvenido a Voley Stats
+                </h1>
+                <p className="text-slate-600 dark:text-slate-400 mt-2">
+                  Panel de control para análisis de partidos de voleibol
+                </p>
+              </div>
+              <NotificationIcon />
             </div>
 
             {/* Quick Actions */}

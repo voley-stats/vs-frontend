@@ -44,18 +44,12 @@ const LandingPage = () => {
               Transforma tus partidos de voleibol en datos accionables. 
               Analiza rendimiento, identifica patrones y mejora tu estrategia con inteligencia artificial.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Link 
                 to="/register" 
                 className="bg-primary hover:bg-primary-light text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
               >
                 Comenzar Gratis
-              </Link>
-              <Link 
-                to="/login" 
-                className="bg-transparent text-black dark:text-white border-2 border-black dark:border-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
-              >
-                Ver Demo
               </Link>
             </div>
           </div>
@@ -242,18 +236,12 @@ const LandingPage = () => {
             Únete a cientos de entrenadores y jugadores que ya están usando 
             VoleyStats para llevar su juego al siguiente nivel.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link 
               to="/register" 
               className="bg-white text-primary hover:bg-gray-light px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
             >
               Comenzar Gratis
-            </Link>
-            <Link 
-              to="/login" 
-              className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
-            >
-              Ver Demo
             </Link>
           </div>
         </div>
@@ -547,7 +535,7 @@ const LandingPage = () => {
             <div>
               <h4 className="text-lg font-semibold mb-4">Soporte</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Documentación</a></li>
+                <li><Link to="/docs" className="hover:text-white transition-colors">Documentación</Link></li>
                 <li><Link to="/help" className="hover:text-white transition-colors">Ayuda</Link></li>
                 <li><Link to="/contact" className="hover:text-white transition-colors">Contacto</Link></li>
               </ul>
@@ -555,7 +543,7 @@ const LandingPage = () => {
             <div>
               <h4 className="text-lg font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Privacidad</a></li>
+                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacidad</Link></li>
                 <li><a href="#" className="hover:text-white transition-colors">Términos</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Cookies</a></li>
               </ul>

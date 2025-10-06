@@ -75,7 +75,15 @@ const VideoUpload = () => {
       }
     } catch (err) {
       console.error('❌ Error cargando categorías:', err);
-      setError(`Error cargando categorías disponibles: ${err.message}`);
+      
+      // Si es un error de red o servidor, mostrar mensaje más amigable
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        setError('Error de conexión. Verifica tu conexión a internet e intenta nuevamente.');
+      } else if (err.message.includes('Categoría no encontrada')) {
+        setError('No tienes categorías asignadas. Contacta al administrador para obtener acceso.');
+      } else {
+        setError(`Error cargando categorías disponibles: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -95,6 +103,12 @@ const VideoUpload = () => {
     setError('');
 
     try {
+      // Encontrar el category_id basado en la categoría seleccionada
+      const selectedCategory = categoryOptions.find(cat => cat.value === formData.category);
+      if (!selectedCategory) {
+        throw new Error('Debe seleccionar una categoría válida');
+      }
+
       // Primero crear el partido
       const matchData = {
         home_team: formData.home_team,
@@ -102,7 +116,8 @@ const VideoUpload = () => {
         match_date: formData.match_date,
         tournament: formData.tournament,
         season: formData.season,
-        description: formData.description
+        description: formData.description,
+        category_id: selectedCategory.id
       };
 
       const matchResult = await matchService.createMatch(matchData);
@@ -155,12 +170,26 @@ const VideoUpload = () => {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="ml-3 flex-1">
                 <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
                   Sin categorías disponibles
                 </h3>
                 <div className="mt-2 text-sm text-red-700 dark:text-red-300">
                   <p>{error || 'No tienes categorías asignadas. Contacta al administrador para obtener acceso.'}</p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => {
+                      categoryService.clearCache();
+                      loadUserCategories();
+                    }}
+                    className="inline-flex items-center px-3 py-2 border border-red-300 dark:border-red-600 rounded-md text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Reintentar
+                  </button>
                 </div>
               </div>
             </div>

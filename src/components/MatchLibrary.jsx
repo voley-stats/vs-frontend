@@ -1,79 +1,135 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import BackButton from './BackButton';
+import { matchService } from '../services/matchService';
+import LoadingSpinner from './LoadingSpinner';
+import { useFilters } from '../contexts/FiltersContext';
 
 const MatchLibrary = () => {
-  const [filters, setFilters] = useState({
-    dateFrom: '',
-    dateTo: '',
-    team: '',
-    status: '',
-    season: ''
-  });
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { filters } = useFilters();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const matchesPerPage = 5;
 
-  const matches = [
-    {
-      id: 1,
-      teams: 'Equipo A vs Equipo B',
-      date: '2024-01-15',
-      tournament: 'Liga Nacional 2024',
-      season: 'Apertura',
-      status: 'Procesado',
-      score: '3-1',
-      duration: '2h 15min',
-      actions: 45
-    },
-    {
-      id: 2,
-      teams: 'Equipo C vs Equipo D',
-      date: '2024-01-14',
-      tournament: 'Copa Regional',
-      season: 'Clausura',
-      status: 'Pendiente',
-      score: '-',
-      duration: '-',
-      actions: 0
-    },
-    {
-      id: 3,
-      teams: 'Equipo E vs Equipo F',
-      date: '2024-01-13',
-      tournament: 'Liga Nacional 2024',
-      season: 'Apertura',
-      status: 'Procesado',
-      score: '3-2',
-      duration: '2h 45min',
-      actions: 52
-    },
-    {
-      id: 4,
-      teams: 'Equipo G vs Equipo H',
-      date: '2024-01-12',
-      tournament: 'Torneo Juvenil',
-      season: 'Liga',
-      status: 'Procesado',
-      score: '3-0',
-      duration: '1h 30min',
-      actions: 28
-    }
-  ];
+  // Cargar partidos del backend
+  useEffect(() => {
+    const loadMatches = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Los filtros se obtienen del contexto
+        
+        // Construir parámetros de filtro para la API
+        const queryParams = new URLSearchParams();
+        
+        if (filters.team) queryParams.append('team', filters.team);
+        
+        // Mapear valores del sidebar a valores del backend
+        if (filters.status) {
+          let backendStatus = filters.status;
+          if (filters.status === 'Procesado') backendStatus = 'completed';
+          if (filters.status === 'Pendiente') backendStatus = 'pending';
+          queryParams.append('status', backendStatus);
+        }
+        
+        if (filters.season) queryParams.append('tournament', filters.season);
+        if (filters.dateFrom) queryParams.append('dateFrom', filters.dateFrom);
+        if (filters.dateTo) queryParams.append('dateTo', filters.dateTo);
+        
+        const queryString = queryParams.toString();
+        const url = queryString ? `?${queryString}` : '';
+        
+        const response = await matchService.getMatches(url);
+        setMatches(response.matches || []);
+        
+        // Calcular total de páginas
+        const totalMatches = response.matches?.length || 0;
+        const pages = Math.ceil(totalMatches / matchesPerPage);
+        setTotalPages(pages);
+      } catch (err) {
+        setError(err.message || 'Error cargando partidos');
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadMatches();
+  }, [filters]);
+
+  // Los filtros principales se manejan en el backend
+  // Solo aplicamos filtro de fecha local para el rango de fechas
   const filteredMatches = matches.filter(match => {
-    const dateMatch = !filters.dateFrom || !filters.dateTo || 
-      (match.date >= filters.dateFrom && match.date <= filters.dateTo);
-    const teamMatch = !filters.team || match.teams.toLowerCase().includes(filters.team.toLowerCase());
-    const statusMatch = !filters.status || match.status === filters.status;
-    const seasonMatch = !filters.season || match.season === filters.season;
-    
-    return dateMatch && teamMatch && statusMatch && seasonMatch;
+    if (filters.dateTo) {
+      return match.match_date <= filters.dateTo;
+    }
+    return true;
   });
 
-  const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value
-    });
+  // Calcular partidos para la página actual
+  const startIndex = (currentPage - 1) * matchesPerPage;
+  const endIndex = startIndex + matchesPerPage;
+  const currentMatches = filteredMatches.slice(startIndex, endIndex);
+
+  // Funciones de paginación
+  const goToPage = (page) => {
+    setCurrentPage(page);
   };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Los filtros se manejan en el Sidebar a través del contexto
+
+  if (loading) {
+    return (
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <BackButton to="/" className="mb-4" />
+          <div className="flex justify-center items-center h-64">
+            <LoadingSpinner />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <BackButton to="/" className="mb-4" />
+          <div className="text-center">
+            <div className="text-red-600 dark:text-red-400 mb-4">
+              <span className="material-symbols-outlined text-4xl">error</span>
+            </div>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+              Error cargando partidos
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -93,77 +149,157 @@ const MatchLibrary = () => {
         {/* Matches List */}
         <div className="bg-white dark:bg-slate-900/50 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
           <div className="p-6 border-b border-slate-200/80 dark:border-slate-800/80">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Partidos ({filteredMatches.length})
-            </h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                Partidos ({filteredMatches.length})
+              </h2>
+              {totalPages > 1 && (
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  Página {currentPage} de {totalPages}
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="divide-y divide-slate-200/80 dark:divide-slate-800/80">
-            {filteredMatches.map((match) => (
-              <div key={match.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-4 mb-2">
-                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">
-                        {match.teams}
-                      </h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        match.status === 'Procesado' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      }`}>
-                        {match.status}
-                      </span>
+            {filteredMatches.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="text-slate-400 dark:text-slate-500 mb-4">
+                  <span className="material-symbols-outlined text-4xl">sports_volleyball</span>
+                </div>
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+                  No hay partidos disponibles
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Aún no tienes partidos registrados. Sube un video para comenzar el análisis.
+                </p>
+              </div>
+            ) : (
+              currentMatches.map((match) => (
+                <div key={match.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-4 mb-2">
+                        <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                          {match.home_team} vs {match.away_team}
+                        </h3>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          match.status === 'completed' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                            : match.status === 'processing'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                        }`}>
+                          {match.status === 'completed' ? 'Completado' : 
+                           match.status === 'processing' ? 'Procesando' : 'Pendiente'}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm text-slate-600 dark:text-slate-400">
+                        <div>
+                          <span className="font-medium">Fecha:</span> {new Date(match.match_date).toLocaleDateString()}
+                        </div>
+                        <div>
+                          <span className="font-medium">Torneo:</span> {match.tournament || 'N/A'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Temporada:</span> {match.season || 'N/A'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Duración:</span> {match.duration ? `${match.duration} min` : 'N/A'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Video:</span> {match.video_processed ? 'Sí' : 'No'}
+                        </div>
+                      </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm text-slate-600 dark:text-slate-400">
-                      <div>
-                        <span className="font-medium">Fecha:</span> {match.date}
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                          {match.home_score} - {match.away_score}
+                        </div>
                       </div>
-                      <div>
-                        <span className="font-medium">Torneo:</span> {match.tournament}
-                      </div>
-                      <div>
-                        <span className="font-medium">Temporada:</span> {match.season}
-                      </div>
-                      <div>
-                        <span className="font-medium">Duración:</span> {match.duration}
-                      </div>
-                      <div>
-                        <span className="font-medium">Acciones:</span> {match.actions}
-                      </div>
+                      
+                      {match.status === 'completed' && match.video_processed ? (
+                        <Link
+                          to={`/stats/${match.id}`}
+                          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                        >
+                          <span className="material-symbols-outlined mr-2">visibility</span>
+                          Ver Análisis
+                        </Link>
+                      ) : match.status === 'processing' ? (
+                        <button
+                          disabled
+                          className="inline-flex items-center px-4 py-2 bg-blue-300 dark:bg-blue-600 text-blue-500 dark:text-blue-400 rounded-md cursor-not-allowed"
+                        >
+                          <span className="material-symbols-outlined mr-2">schedule</span>
+                          Procesando...
+                        </button>
+                      ) : (
+                        <button
+                          disabled
+                          className="inline-flex items-center px-4 py-2 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 rounded-md cursor-not-allowed"
+                        >
+                          <span className="material-symbols-outlined mr-2">pending</span>
+                          Pendiente
+                        </button>
+                      )}
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                        {match.score}
-                      </div>
-                    </div>
-                    
-                    {match.status === 'Procesado' ? (
-                      <Link
-                        to={`/stats/${match.id}`}
-                        className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-                      >
-                        <span className="material-symbols-outlined mr-2">visibility</span>
-                        Ver Análisis
-                      </Link>
-                    ) : (
-                      <button
-                        disabled
-                        className="inline-flex items-center px-4 py-2 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 rounded-md cursor-not-allowed"
-                      >
-                        <span className="material-symbols-outlined mr-2">schedule</span>
-                        Procesando...
-                      </button>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
+          
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <div className="p-6 border-t border-slate-200/80 dark:border-slate-800/80">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  Mostrando {startIndex + 1} a {Math.min(endIndex, filteredMatches.length)} de {filteredMatches.length} partidos
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  {/* Botón Anterior */}
+                  <button
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Anterior
+                  </button>
+                  
+                  {/* Números de página */}
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          currentPage === page
+                            ? 'bg-primary text-white'
+                            : 'text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Botón Siguiente */}
+                  <button
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
