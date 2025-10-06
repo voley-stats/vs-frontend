@@ -1,76 +1,254 @@
 import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import VoleyStatsLogo from './VoleyStatsLogo';
 
 const Sidebar = () => {
-  const [selectedPlayer, setSelectedPlayer] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
+  
+  // Estado para filtros (solo cuando estamos en partidos)
+  const [filters, setFilters] = useState({
+    dateFrom: '',
+    dateTo: '',
+    team: '',
+    status: '',
+    season: ''
+  });
+  
+  // Detectar si estamos en la sección de partidos
+  const isInMatchesSection = location.pathname === '/library';
 
-  const generalStats = [
-    { label: 'Saques', value: 12 },
-    { label: 'Bloqueos', value: 8 },
-    { label: 'Recepciones', value: 25 },
-    { label: 'Puntos', value: 60 },
-    { label: 'Errores', value: 15 }
+  // Navegación base para todos los usuarios
+  const baseNavigationItems = [
+    {
+      name: 'Resumen',
+      href: '/',
+      icon: 'bar_chart',
+      current: location.pathname === '/'
+    },
+    {
+      name: 'Estadísticas',
+      href: '/stats',
+      icon: 'show_chart',
+      current: location.pathname.startsWith('/stats')
+    },
+    {
+      name: 'Partidos',
+      href: '/library',
+      icon: 'event',
+      current: location.pathname === '/library'
+    }
   ];
 
-  const playerStats = [
-    { label: 'Saques', value: 3 },
-    { label: 'Bloqueos', value: 2 },
-    { label: 'Recepciones', value: 5 },
-    { label: 'Puntos', value: 15 },
-    { label: 'Errores', value: 3 }
+  // Navegación para entrenadores/administradores (coach = admin)
+  const coachAdminNavigationItems = [
+    {
+      name: 'Subir Video',
+      href: '/upload',
+      icon: 'upload',
+      current: location.pathname === '/upload'
+    },
+    {
+      name: 'Gestión del Equipo',
+      href: '/teams',
+      icon: 'groups',
+      current: location.pathname === '/teams'
+    }
   ];
+
+  // Construir navegación según el rol
+  let navigationItems = [...baseNavigationItems];
+  
+  // Entrenadores y administradores (coach = admin) tienen acceso completo
+  if (user?.role === 'coach' || user?.role === 'admin') {
+    navigationItems = [...navigationItems, ...coachAdminNavigationItems];
+  }
+
+
+  const settingsItem = {
+    name: 'Configuración',
+    href: '/settings',
+    icon: 'settings',
+    current: location.pathname === '/settings'
+  };
+
+  const profileItem = {
+    name: 'Mi Perfil',
+    href: '/profile',
+    icon: 'person',
+    current: location.pathname === '/profile'
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const handleFilterChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value
+    });
+  };
 
   return (
-    <aside className="lg:col-span-1 flex flex-col gap-6">
-      <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Partido 1</h1>
-        
-        <div className="space-y-3">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white pt-2">Métricas Generales</h3>
-          <div className="text-sm space-y-3 text-slate-600 dark:text-slate-400">
-            {generalStats.map((stat, index) => (
-              <div 
-                key={index}
-                className={`flex justify-between items-center py-2 ${
-                  index < generalStats.length - 1 ? 'border-b border-slate-200/80 dark:border-slate-800/80' : ''
-                }`}
-              >
-                <p>{stat.label}</p>
-                <p className="font-semibold text-slate-800 dark:text-slate-200">{stat.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-6 space-y-3">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white pt-2">Estadísticas por Jugador</h3>
-          <select 
-            className="form-select w-full rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:ring-primary focus:border-primary"
-            value={selectedPlayer}
-            onChange={(e) => setSelectedPlayer(e.target.value)}
-          >
-            <option value="">Seleccionar Jugador</option>
-            <option value="jugador-a">Jugador A</option>
-            <option value="jugador-b">Jugador B</option>
-          </select>
-          
-          {selectedPlayer && (
-            <div className="text-sm space-y-3 text-slate-600 dark:text-slate-400">
-              {playerStats.map((stat, index) => (
-                <div 
-                  key={index}
-                  className={`flex justify-between items-center py-2 ${
-                    index < playerStats.length - 1 ? 'border-b border-slate-200/80 dark:border-slate-800/80' : ''
-                  }`}
-                >
-                  <p>{stat.label}</p>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200">{stat.value}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+    <div className="fixed left-0 top-0 flex flex-col h-screen bg-black dark:bg-gray-dark w-64 z-50">
+      {/* Logo */}
+      <div className="flex items-center px-6 py-4 border-b border-gray-700">
+        <VoleyStatsLogo size="sidebar" />
       </div>
-    </aside>
+
+      {/* Navigation - Ocupa todo el espacio disponible */}
+      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        {isInMatchesSection ? (
+          // Mostrar filtros cuando estamos en partidos
+          <div className="space-y-4">
+            <h3 className="text-white text-lg font-medium mb-4">Filtros</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Fecha Desde
+                </label>
+                <input
+                  type="date"
+                  name="dateFrom"
+                  value={filters.dateFrom}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Fecha Hasta
+                </label>
+                <input
+                  type="date"
+                  name="dateTo"
+                  value={filters.dateTo}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Equipo
+                </label>
+                <input
+                  type="text"
+                  name="team"
+                  value={filters.team}
+                  onChange={handleFilterChange}
+                  placeholder="Buscar por equipo..."
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Temporada
+                </label>
+                <select
+                  name="season"
+                  value={filters.season}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Todas las temporadas</option>
+                  <option value="Apertura">Apertura</option>
+                  <option value="Clausura">Clausura</option>
+                  <option value="Liga">Liga</option>
+                  <option value="Copa">Copa</option>
+                  <option value="Playoff">Playoff</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Estado
+                </label>
+                <select
+                  name="status"
+                  value={filters.status}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Todos los estados</option>
+                  <option value="Procesado">Procesado</option>
+                  <option value="Pendiente">Pendiente</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Mostrar navegación normal
+          navigationItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={`group flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                item.current
+                  ? 'bg-primary text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`}
+            >
+              <span className="material-symbols-outlined mr-3 text-lg">
+                {item.icon}
+              </span>
+              {item.name}
+            </Link>
+          ))
+        )}
+      </nav>
+
+      {/* Opciones de Usuario - Siempre al final */}
+      <div className="px-4 py-4 border-t border-gray-700 space-y-2 bg-black dark:bg-gray-dark">
+        <Link
+          to={settingsItem.href}
+          className={`group flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
+            settingsItem.current
+              ? 'bg-primary text-white'
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+          }`}
+        >
+          <span className="material-symbols-outlined mr-3 text-lg">
+            {settingsItem.icon}
+          </span>
+          {settingsItem.name}
+        </Link>
+
+        <Link
+          to={profileItem.href}
+          className={`group flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
+            profileItem.current
+              ? 'bg-primary text-white'
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+          }`}
+        >
+          <span className="material-symbols-outlined mr-3 text-lg">
+            {profileItem.icon}
+          </span>
+          {profileItem.name}
+        </Link>
+        
+        <button
+          onClick={handleLogout}
+          className="w-full group flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors text-gray-300 hover:bg-red-600 hover:text-white"
+        >
+          <span className="material-symbols-outlined mr-3 text-lg">
+            logout
+          </span>
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
   );
 };
 

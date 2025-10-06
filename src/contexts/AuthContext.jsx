@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 import { preferencesService } from '../services/preferencesService';
+import { coachProfileService } from '../services/coachProfileService';
 
 const AuthContext = createContext();
 
@@ -15,6 +16,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileComplete, setProfileComplete] = useState(true);
 
   // Cargar usuario desde localStorage al iniciar
   useEffect(() => {
@@ -28,6 +30,9 @@ export const AuthProvider = ({ children }) => {
           const data = await authService.verifyToken();
           if (data && data.valid) {
             setUser(data.user);
+            
+            // Para todos los roles, considerar el perfil como completo por defecto
+            setProfileComplete(true);
           } else {
             // Token inválido, limpiar localStorage
             authService.logout();
@@ -50,6 +55,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authService.login(credentials.email, credentials.password);
       setUser(data.user);
+      
+      // Para todos los roles, considerar el perfil como completo por defecto
+      // Solo verificar si es realmente necesario completar el perfil
+      setProfileComplete(true);
+      
       return { success: true };
     } catch (error) {
       throw error;
@@ -66,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     
     authService.logout();
     setUser(null);
+    setProfileComplete(false);
     // Limpiar cualquier caché adicional
     localStorage.removeItem('voleyStats_user');
     localStorage.removeItem('admin_data');
@@ -96,7 +107,23 @@ export const AuthProvider = ({ children }) => {
         'manage_users',
         'manage_settings',
         'view_analytics',
-        'manage_plans'
+        'manage_plans',
+        'manage_teams',
+        'invite_members'
+      ],
+      coach: [
+        'view_dashboard',
+        'upload_videos',
+        'view_library',
+        'view_stats',
+        'manage_teams',
+        'invite_members',
+        'view_analytics'
+      ],
+      assistant: [
+        'view_dashboard',
+        'view_library',
+        'view_stats'
       ],
       user: [
         'view_dashboard',
@@ -109,13 +136,19 @@ export const AuthProvider = ({ children }) => {
     return permissions[user.role]?.includes(permission) || false;
   };
 
+  const updateProfileComplete = (isComplete) => {
+    setProfileComplete(isComplete);
+  };
+
   const value = {
     user,
     loading,
+    profileComplete,
     login,
     logout,
     hasRole,
-    hasPermission
+    hasPermission,
+    updateProfileComplete
   };
 
   return (

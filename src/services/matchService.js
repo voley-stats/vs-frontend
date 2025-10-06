@@ -22,7 +22,7 @@ export const matchService = {
 
   async getRecentMatches(limit = 5) {
     try {
-      const response = await api.get(`/matches?limit=${limit}&sort=created_at&order=desc`);
+      const response = await api.get(`/matches?limit=${limit}&sort=created_at&order=desc&withVideos=true`);
       return response;
     } catch (error) {
       throw new Error(error.message || 'Error obteniendo partidos recientes');
