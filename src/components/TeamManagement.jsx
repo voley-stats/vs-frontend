@@ -28,7 +28,8 @@ const TeamManagement = () => {
       setLoading(true);
       
       // Obtener categorías reales del backend
-      const response = await fetch('http://localhost:3001/api/categories', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/categories`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

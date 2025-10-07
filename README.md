@@ -18,22 +18,80 @@ Una aplicación web moderna para el análisis inteligente de partidos de voleibo
 - **Tailwind CSS** - Framework de CSS utilitario
 - **Material Symbols** - Iconografía moderna
 
-## 📦 Instalación
+## 📦 Instalación y Configuración
 
-1. **Instalar dependencias:**
+### Prerrequisitos
+- Node.js 18+ 
+- npm 9+ o yarn 1.22+
+- Git
+
+### Configuración Inicial
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone <repository-url>
+   cd vs-frontend
+   ```
+
+2. **Instalar dependencias:**
    ```bash
    npm install
    ```
 
-2. **Ejecutar en modo desarrollo:**
+3. **Configurar variables de entorno:**
+   ```bash
+   # Copiar archivo de configuración de ejemplo
+   cp config.example.js config.js
+   
+   # O crear archivo .env (recomendado)
+   echo "VITE_API_URL=http://localhost:3001/api" > .env
+   ```
+
+4. **Ejecutar en modo desarrollo:**
    ```bash
    npm run dev
    ```
 
-3. **Construir para producción:**
+5. **Construir para producción:**
    ```bash
    npm run build
    ```
+
+### Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+```env
+# URL del backend API (OBLIGATORIO)
+VITE_API_URL=http://localhost:3001/api
+
+# Configuración de la aplicación
+VITE_APP_NAME=VoleyStats
+VITE_APP_VERSION=1.0.0
+
+# Configuración opcional
+VITE_ENABLE_NOTIFICATIONS=true
+VITE_DEV_MODE=true
+```
+
+### ⚠️ Variables Críticas
+
+**VITE_API_URL** es **OBLIGATORIA** - sin esta variable la aplicación no funcionará.
+
+Para una configuración completa, copia `env.example` a `.env`:
+```bash
+cp env.example .env
+```
+
+### Scripts Disponibles
+
+- `npm run dev` - Servidor de desarrollo
+- `npm run build` - Construcción para producción
+- `npm run preview` - Vista previa de la construcción
+- `npm run lint` - Linting del código
+- `npm run lint:fix` - Corregir errores de linting automáticamente
+- `npm run format` - Formatear código con Prettier
+- `npm run clean` - Limpiar archivos de build y cache
 
 ## 🎨 Componentes Principales
 
@@ -93,12 +151,34 @@ src/
 └── index.css
 ```
 
-## 🚀 Scripts Disponibles
+## 🚀 Desarrollo
 
-- `npm run dev` - Servidor de desarrollo
-- `npm run build` - Construcción para producción
-- `npm run preview` - Vista previa de la construcción
-- `npm run lint` - Linting del código
+### Estructura del Proyecto
+```
+src/
+├── components/          # Componentes React
+├── services/           # Servicios de API
+├── contexts/           # Contextos de React
+├── hooks/              # Hooks personalizados
+├── assets/             # Recursos estáticos
+├── App.jsx             # Componente principal
+└── main.jsx            # Punto de entrada
+```
+
+### Configuración de Desarrollo
+
+1. **Configurar el backend:**
+   - Asegúrate de que el backend esté ejecutándose en `http://localhost:3001`
+   - O configura `VITE_API_URL` en tu archivo `.env`
+
+2. **Configurar el editor:**
+   - Instala las extensiones de ESLint y Prettier
+   - Configura el formato automático al guardar
+
+3. **Debugging:**
+   - Usa las herramientas de desarrollo de React
+   - Revisa la consola del navegador para errores
+   - Usa `console.log` para debugging temporal
 
 ## 📄 Licencia
 

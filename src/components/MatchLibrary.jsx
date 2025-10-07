@@ -12,7 +12,8 @@ const MatchLibrary = () => {
   const { filters } = useFilters();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const matchesPerPage = 5;
+  const [totalMatches, setTotalMatches] = useState(0);
+  const matchesPerPage = 5; // 5 partidos por página para navegación más fácil
 
   // Cargar partidos del backend
   useEffect(() => {
@@ -22,6 +23,7 @@ const MatchLibrary = () => {
         setError(null);
         
         // Los filtros se obtienen del contexto
+        console.log('🔍 Filtros recibidos:', filters);
         
         // Construir parámetros de filtro para la API
         const queryParams = new URLSearchParams();
@@ -37,8 +39,18 @@ const MatchLibrary = () => {
         }
         
         if (filters.season) queryParams.append('tournament', filters.season);
-        if (filters.dateFrom) queryParams.append('dateFrom', filters.dateFrom);
-        if (filters.dateTo) queryParams.append('dateTo', filters.dateTo);
+        if (filters.dateFrom) {
+          console.log('🔍 Enviando dateFrom:', filters.dateFrom);
+          queryParams.append('dateFrom', filters.dateFrom);
+        }
+        if (filters.dateTo) {
+          console.log('🔍 Enviando dateTo:', filters.dateTo);
+          queryParams.append('dateTo', filters.dateTo);
+        }
+        
+        // Agregar parámetros de paginación
+        queryParams.append('page', currentPage);
+        queryParams.append('limit', matchesPerPage);
         
         const queryString = queryParams.toString();
         const url = queryString ? `?${queryString}` : '';
@@ -46,10 +58,17 @@ const MatchLibrary = () => {
         const response = await matchService.getMatches(url);
         setMatches(response.matches || []);
         
-        // Calcular total de páginas
-        const totalMatches = response.matches?.length || 0;
-        const pages = Math.ceil(totalMatches / matchesPerPage);
-        setTotalPages(pages);
+        // Usar la paginación del backend
+        if (response.pagination) {
+          setTotalPages(response.pagination.pages);
+          setTotalMatches(response.pagination.total);
+        } else {
+          // Fallback si no hay paginación en la respuesta
+          const totalMatches = response.matches?.length || 0;
+          const pages = Math.ceil(totalMatches / matchesPerPage);
+          setTotalPages(pages);
+          setTotalMatches(totalMatches);
+        }
       } catch (err) {
         setError(err.message || 'Error cargando partidos');
       } finally {
@@ -58,7 +77,7 @@ const MatchLibrary = () => {
     };
 
     loadMatches();
-  }, [filters]);
+  }, [filters, currentPage]); // Agregar currentPage como dependencia
 
   // Los filtros principales se manejan en el backend
   // Solo aplicamos filtro de fecha local para el rango de fechas
@@ -69,10 +88,8 @@ const MatchLibrary = () => {
     return true;
   });
 
-  // Calcular partidos para la página actual
-  const startIndex = (currentPage - 1) * matchesPerPage;
-  const endIndex = startIndex + matchesPerPage;
-  const currentMatches = filteredMatches.slice(startIndex, endIndex);
+  // Ya no necesitamos paginación local, el backend maneja todo
+  const currentMatches = filteredMatches;
 
   // Funciones de paginación
   const goToPage = (page) => {
@@ -151,7 +168,7 @@ const MatchLibrary = () => {
           <div className="p-6 border-b border-slate-200/80 dark:border-slate-800/80">
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                Partidos ({filteredMatches.length})
+                Partidos ({totalMatches})
               </h2>
               {totalPages > 1 && (
                 <div className="text-sm text-slate-600 dark:text-slate-400">
@@ -258,7 +275,7 @@ const MatchLibrary = () => {
             <div className="p-6 border-t border-slate-200/80 dark:border-slate-800/80">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-slate-600 dark:text-slate-400">
-                  Mostrando {startIndex + 1} a {Math.min(endIndex, filteredMatches.length)} de {filteredMatches.length} partidos
+                  Mostrando {((currentPage - 1) * matchesPerPage) + 1} a {Math.min(currentPage * matchesPerPage, totalMatches)} de {totalMatches} partidos
                 </div>
                 
                 <div className="flex items-center space-x-2">
