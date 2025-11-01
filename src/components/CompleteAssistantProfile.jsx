@@ -60,7 +60,8 @@ const CompleteAssistantProfile = () => {
       }
 
       // Actualizar contraseña del usuario (endpoint específico para invitados)
-      const response = await fetch(`http://localhost:3001/api/profile/password/setup`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/profile/password/setup`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

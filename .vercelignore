@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.vite/
+
+# Environment files (las variables de entorno se configuran en Vercel dashboard)
+.env
+.env.local
+.env.*.local
+
+# Development files
+*.log
+.DS_Store
+
+# Testing
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation (opcional - puedes dejarlos si quieres)
+# README.md
+# SETUP.md
+# VARIABLES.md
+

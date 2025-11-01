@@ -38,7 +38,8 @@ const TeamInvitation = () => {
       }
 
       // Cargar información real de la invitación desde el backend
-      const response = await fetch(`http://localhost:3001/api/teams/invite/verify?token=${token}`);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/teams/invite/verify?token=${token}`);
       const result = await response.json();
 
       if (!response.ok) {
@@ -78,7 +79,8 @@ const TeamInvitation = () => {
       }
 
       // Llamar a la API real para aceptar invitación
-      const response = await fetch('http://localhost:3001/api/teams/invite/accept', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/teams/invite/accept`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

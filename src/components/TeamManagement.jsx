@@ -69,7 +69,8 @@ const TeamManagement = () => {
 
     try {
       // Invitar miembro a la categoría usando el endpoint de categorías
-      const response = await fetch(`http://localhost:3001/api/categories/${selectedTeam.id}/invite`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/categories/${selectedTeam.id}/invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +102,8 @@ const TeamManagement = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/api/categories/${categoryId}/members/${memberId}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/categories/${categoryId}/members/${memberId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -129,7 +131,8 @@ const TeamManagement = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/api/categories/${categoryId}/members/${memberId}/reactivate`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/categories/${categoryId}/members/${memberId}/reactivate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

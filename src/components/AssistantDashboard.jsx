@@ -15,7 +15,8 @@ const AssistantDashboard = () => {
     try {
       setLoading(true);
       // Cargar categorías del ayudante
-      const response = await fetch('http://localhost:3001/api/categories/my-categories', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/categories/my-categories`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
