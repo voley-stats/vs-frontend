@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { teamService } from '../services/teamService';
-import { authService } from '../services/authService';
 import LoadingSpinner from './LoadingSpinner';
 
 const TeamInvitation = () => {
@@ -12,14 +10,26 @@ const TeamInvitation = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [invitation, setInvitation] = useState(null);
-  const [user, setUser] = useState(null);
+  const [invitationType, setInvitationType] = useState('new_user');
+  
+  // Estado para el flujo de cambio de contraseña
+  const [requiresPasswordChange, setRequiresPasswordChange] = useState(false);
+  const [tempToken, setTempToken] = useState(null);
+  const [acceptedUser, setAcceptedUser] = useState(null);
+  
+  // Datos del formulario inicial
   const [formData, setFormData] = useState({
     full_name: '',
     password: '',
     confirm_password: '',
     email: ''
   });
-  const [invitationType, setInvitationType] = useState('new_user');
+  
+  // Datos del formulario de cambio de contraseña
+  const [passwordChangeData, setPasswordChangeData] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   useEffect(() => {
     if (token) {
@@ -99,12 +109,81 @@ const TeamInvitation = () => {
         throw new Error(result.error || 'Error aceptando invitación');
       }
       
-      setSuccess('Invitación aceptada exitosamente. Redirigiendo al dashboard...');
+      // Verificar si requiere cambio de contraseña
+      if (result.requiresPasswordChange && result.tempToken) {
+        setRequiresPasswordChange(true);
+        setTempToken(result.tempToken);
+        setAcceptedUser(result.user);
+        setSuccess('Invitación aceptada. Ahora configura tu contraseña personal.');
+        return;
+      }
+      
+      // Si no requiere cambio de contraseña (caso de usuario existente), redirigir directamente
+      setSuccess('Invitación aceptada exitosamente. Redirigiendo...');
       setTimeout(() => {
         navigate('/');
       }, 2000);
     } catch (err) {
       setError(err.message || 'Error aceptando invitación');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // Validar contraseñas
+      if (passwordChangeData.newPassword !== passwordChangeData.confirmPassword) {
+        setError('Las contraseñas no coinciden');
+        setLoading(false);
+        return;
+      }
+
+      if (passwordChangeData.newPassword.length < 6) {
+        setError('La contraseña debe tener al menos 6 caracteres');
+        setLoading(false);
+        return;
+      }
+
+      // Llamar al endpoint de setup de contraseña
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_URL}/profile/password/setup`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tempToken}`
+        },
+        body: JSON.stringify({
+          newPassword: passwordChangeData.newPassword
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error cambiando contraseña');
+      }
+
+      // Guardar token JWT permanente para login automático
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+      }
+
+      setSuccess('Contraseña configurada exitosamente. Redirigiendo...');
+      
+      // Redirigir al dashboard después de 2 segundos
+      setTimeout(() => {
+        // Recargar la página para que el AuthContext detecte el nuevo token
+        window.location.href = '/';
+      }, 2000);
+    } catch (err) {
+      setError(err.message || 'Error cambiando contraseña');
     } finally {
       setLoading(false);
     }
@@ -131,7 +210,7 @@ const TeamInvitation = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !invitation && !requiresPasswordChange) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-light dark:bg-black">
         <div className="text-center">
@@ -142,7 +221,7 @@ const TeamInvitation = () => {
     );
   }
 
-  if (error && !invitation) {
+  if (error && !invitation && !requiresPasswordChange) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-light dark:bg-black">
         <div className="max-w-md w-full bg-white dark:bg-gray-dark rounded-lg shadow-lg p-6">
@@ -170,6 +249,99 @@ const TeamInvitation = () => {
     );
   }
 
+  // Pantalla de cambio de contraseña
+  if (requiresPasswordChange) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-light dark:bg-black py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 mb-4">
+              <svg className="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Configurar Contraseña
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Bienvenido, {acceptedUser?.full_name || acceptedUser?.username || 'Usuario'}. 
+              Por favor configura una contraseña personal para tu cuenta.
+            </p>
+          </div>
+
+          {/* Error/Success Messages */}
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3">
+              <p className="text-sm text-green-600 dark:text-green-400">{success}</p>
+            </div>
+          )}
+
+          {/* Formulario de cambio de contraseña */}
+          <form onSubmit={handlePasswordChange} className="space-y-6">
+            <div className="bg-white dark:bg-gray-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Nueva Contraseña *
+                  </label>
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    required
+                    value={passwordChangeData.newPassword}
+                    onChange={(e) => setPasswordChangeData(prev => ({ ...prev, newPassword: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    placeholder="Mínimo 6 caracteres"
+                    minLength={6}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Confirmar Nueva Contraseña *
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    required
+                    value={passwordChangeData.confirmPassword}
+                    onChange={(e) => setPasswordChangeData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    placeholder="Confirma tu contraseña"
+                    minLength={6}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Configurando...' : 'Configurar Contraseña'}
+            </button>
+          </form>
+
+          <div className="text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Al configurar tu contraseña, serás redirigido automáticamente al dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla inicial de aceptación de invitación
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-light dark:bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -238,7 +410,7 @@ const TeamInvitation = () => {
                       Usuario Nuevo
                     </h3>
                     <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                      <p>Completa tu registro para unirte al equipo. Recibirás una contraseña temporal por email.</p>
+                      <p>Completa tu registro para unirte al equipo. Usa la contraseña temporal del email.</p>
                     </div>
                   </div>
                 </div>
