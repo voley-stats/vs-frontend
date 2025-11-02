@@ -13,8 +13,15 @@ const getAuthHeaders = () => {
 // Función para manejar respuestas de la API
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Error desconocido' }));
-    throw new Error(error.message || error.error || 'Error en la petición');
+    const error = await response.json().catch(() => ({ 
+      error: 'Error desconocido',
+      message: `Error ${response.status}: ${response.statusText}`
+    }));
+    // Incluir el código de estado en el error para poder manejarlo
+    const apiError = new Error(error.message || error.error || 'Error en la petición');
+    apiError.status = response.status;
+    apiError.error = error.error;
+    throw apiError;
   }
   return await response.json();
 };

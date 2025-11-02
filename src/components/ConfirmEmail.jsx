@@ -57,8 +57,11 @@ const ConfirmEmail = () => {
             return;
           }
         } catch (profileError) {
-          // Si no existe el perfil o hay error, asumir que necesita completarlo
-          console.log('Perfil no encontrado, redirigiendo a completar perfil');
+          // Si recibimos 403, significa que el perfil no está completo (el middleware lo bloquea)
+          // Si recibimos otro error, también asumimos que necesita completarlo
+          const is403 = profileError.message?.includes('403') || profileError.message?.includes('Perfil de entrenador incompleto') || profileError.message?.includes('completar');
+          console.log('Error verificando perfil:', profileError.message);
+          console.log('Asumiendo perfil incompleto y redirigiendo a completar perfil');
           updateProfileComplete(false);
           // Dar tiempo para que el contexto se actualice
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -157,23 +160,10 @@ const ConfirmEmail = () => {
             {user?.role === 'coach' ? (
               <button
                 onClick={async () => {
-                  // Verificar perfil y actualizar contexto antes de navegar
-                  try {
-                    const { coachProfileService } = await import('../services/coachProfileService');
-                    const profileCheck = await coachProfileService.checkProfileComplete();
-                    updateProfileComplete(profileCheck.isComplete);
-                    // Dar tiempo para que el contexto se actualice
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    if (!profileCheck.isComplete) {
-                      navigate('/complete-profile');
-                    } else {
-                      navigate('/');
-                    }
-                  } catch (error) {
-                    updateProfileComplete(false);
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    navigate('/complete-profile');
-                  }
+                  // Para un coach recién confirmado, asumimos que el perfil no está completo
+                  updateProfileComplete(false);
+                  await new Promise(resolve => setTimeout(resolve, 100));
+                  navigate('/complete-profile');
                 }}
                 className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >

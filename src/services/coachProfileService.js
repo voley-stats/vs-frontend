@@ -17,6 +17,10 @@ export const coachProfileService = {
       const response = await api.post('/coach-profile', profileData);
       return response;
     } catch (error) {
+      // Mejorar el mensaje de error si es 403
+      if (error.status === 403) {
+        throw new Error('No tienes permisos para completar el perfil. Por favor, verifica tu sesión.');
+      }
       throw new Error(error.message || 'Error guardando perfil de entrenador');
     }
   },
@@ -47,7 +51,11 @@ export const coachProfileService = {
       const response = await api.get('/coach-profile/check');
       return response;
     } catch (error) {
-      throw new Error(error.message || 'Error verificando perfil de entrenador');
+      // Si recibimos 403, significa que el perfil no está completo (el middleware lo bloquea)
+      if (error.status === 403) {
+        return { isComplete: false, message: 'Perfil incompleto' };
+      }
+      throw error;
     }
   },
 

@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }) => {
                 const profileCheck = await coachProfileService.checkProfileComplete();
                 setProfileComplete(profileCheck.isComplete);
               } catch (profileError) {
-                // Si no existe el perfil o hay error, asumir que no está completo
+                // Si recibimos 403 o cualquier error, asumir que no está completo
+                // (403 puede significar que el middleware bloquea porque el perfil no está completo)
                 console.log('Perfil de coach no encontrado o error al verificar:', profileError);
                 setProfileComplete(false);
               }
