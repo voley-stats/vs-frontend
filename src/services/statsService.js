@@ -57,5 +57,14 @@ export const statsService = {
     } catch (error) {
       throw new Error(error.message || 'Error guardando estadísticas del jugador');
     }
+  },
+
+  // Obtener métricas de análisis de video desde Fargate
+  async getVideoFargateStats(videoId) {
+    try {
+      return await apiClient.get(`/stats/video/${videoId}/fargate`);
+    } catch (error) {
+      throw new Error(error.message || 'Error obteniendo métricas del video');
+    }
   }
 };

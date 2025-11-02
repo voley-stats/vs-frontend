@@ -1,55 +1,175 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BackButton from './BackButton';
+import { statsService } from '../services/statsService';
+import { videoService } from '../services/videoService';
+import LoadingSpinner from './LoadingSpinner';
+
+// Mapeo de event_types del backend a nombres en español
+const EVENT_TYPE_MAPPING = {
+  'serve': 'Saques',
+  'block': 'Bloqueos',
+  'receive': 'Recepciones',
+  'attack': 'Ataques',
+  'point': 'Puntos',
+  'error': 'Errores',
+  'dig': 'Defensas',
+  'set': 'Colocaciones'
+};
 
 const DetailedStats = () => {
-  const [selectedPlayer, setSelectedPlayer] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('Puntos');
+  const { id } = useParams(); // Este es el videoId
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [statsData, setStatsData] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState('');
 
-  const generalStats = [
-    { label: 'Saques', value: 12, percentage: 85 },
-    { label: 'Bloqueos', value: 8, percentage: 70 },
-    { label: 'Recepciones', value: 25, percentage: 90 },
-    { label: 'Puntos', value: 60, percentage: 75 },
-    { label: 'Errores', value: 15, percentage: 20 }
-  ];
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!id) {
+        setError('ID no proporcionado');
+        setLoading(false);
+        return;
+      }
 
-  const playerStats = [
-    { label: 'Saques', value: 3, percentage: 80 },
-    { label: 'Bloqueos', value: 2, percentage: 60 },
-    { label: 'Recepciones', value: 5, percentage: 85 },
-    { label: 'Puntos', value: 15, percentage: 70 },
-    { label: 'Errores', value: 3, percentage: 15 }
-  ];
+      try {
+        setLoading(true);
+        
+        // Intentar primero obtener el video desde el match
+        // Si id es un matchId, obtener los videos del match y usar el primero
+        let videoId = id;
+        
+        try {
+          // Intentar obtener videos del match
+          const videosResponse = await videoService.getVideosByMatch(id);
+          if (videosResponse.videos && videosResponse.videos.length > 0) {
+            // Usar el primer video del match
+            videoId = videosResponse.videos[0].id;
+          }
+        } catch (matchError) {
+          // Si falla, asumir que id es directamente un videoId
+          console.log('Asumiendo que id es un videoId:', id);
+          videoId = id;
+        }
 
-  const videoClips = [
-    {
-      id: 1,
-      title: 'Saque Ace - Punto 15',
-      timestamp: '12:34',
-      action: 'Saque',
-      player: 'Jugador A',
-      thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBvlFYv6iOQKx1WjuuzvtV1DzGoTAcvJlFnSVu8QwH2baO-7ciLmX4OU4J2GKAAqpQR3o3MiHsk8VJUE_NoviK70sq92uPepLjwyP38OjMMB-68ns0zqTrw_avQwbUdzXuTJzV09XxfH9E_OKrkDZH9hGoptLgFYaqOtzFA5MjbGNRX6OCttPmqkKm6irk5HeuT0uoHG5oCVImhveeWJokX7vEm3uFUZNHvD4YTXaqk4oxHjbs0g7j1YnViUikAlfyrpKa-vOnnCk0'
-    },
-    {
-      id: 2,
-      title: 'Bloqueo Efectivo - Punto 23',
-      timestamp: '18:45',
-      action: 'Bloqueo',
-      player: 'Jugador B',
-      thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaxruY5vqRw3Afm9I9bqlM_-qT8Gv2GjHSmH__TAsT1fbxs54hTn_IqtxVf4hd6Nwafz51lsD6cfai6qATrD4Fbz7U6X_cO1skpcLL_XfctMUCTwq58Dr8Mz2YnSxG-lMfNLUq6jrmB961w2It8QWd0zC3PyQJYZcHqgkCiyWRlsEzwHyrdWLUnjqRWKJBPdQ6-G_SW1oywWAJRwlDZDnPDDfjpOxccMFZA-uIqxYU9wybgoRH5-CgPQgXPPKn4ADIu1nVR4qxYJA'
-    },
-    {
-      id: 3,
-      title: 'Punto de Partido - Punto 45',
-      timestamp: '28:12',
-      action: 'Ataque',
-      player: 'Jugador C',
-      thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBJs9j-8RCDCJ_gLELWQcujivGrNTjspUkqzxbSYr-hNY_LPXhFoqeh4nkIuw8GsJV8Lfno7-MGYNpZ44P47ZKO46LvLkXGwFyT2s32ud0YSSAJtzcXFSkSfnOBodRNDj4HeFQmjVN2bzmEIFj70FOiMxKRUmvbiEsTb7zD4IufyfIR47PqHqBNnbJg9IXDHGsAIyecNf45tq_DCzmOCGX_TUZcGRKnjYUP66DeGfhjnBSebKbyO8Pc2nLE5qXvZeQ2WvXcwP9Yhww'
-    }
-  ];
+        // Obtener estadísticas del video
+        const data = await statsService.getVideoFargateStats(videoId);
+        setStatsData(data);
+        
+        // Establecer el primer filtro disponible como seleccionado
+        if (data.event_distribution && data.event_distribution.length > 0) {
+          const firstEvent = data.event_distribution[0];
+          setSelectedFilter(EVENT_TYPE_MAPPING[firstEvent.event_type] || firstEvent.event_type);
+        }
+      } catch (err) {
+        console.error('Error obteniendo estadísticas:', err);
+        setError(err.message || 'Error al cargar las estadísticas');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filters = ['Puntos', 'Bloqueos', 'Saques'];
+    fetchStats();
+  }, [id]);
+
+  // Transformar event_distribution a formato para mostrar
+  const getGeneralStats = () => {
+    if (!statsData || !statsData.event_distribution) return [];
+
+    const totalEvents = statsData.summary?.total_events || 
+      statsData.event_distribution.reduce((sum, event) => sum + (event.count || 0), 0);
+
+    return statsData.event_distribution.map(event => {
+      const count = event.count || 0;
+      const percentage = totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0;
+      const label = EVENT_TYPE_MAPPING[event.event_type] || event.event_type;
+      
+      return {
+        label,
+        value: count,
+        percentage,
+        average_confidence: event.average_confidence || 0,
+        event_type: event.event_type
+      };
+    });
+  };
+
+  // Obtener eventos filtrados
+  const getFilteredEvents = () => {
+    if (!statsData || !statsData.detected_events) return [];
+    
+    if (!selectedFilter) return statsData.detected_events;
+
+    // Encontrar el event_type correspondiente al filtro seleccionado
+    const eventTypeKey = Object.keys(EVENT_TYPE_MAPPING).find(
+      key => EVENT_TYPE_MAPPING[key] === selectedFilter
+    );
+
+    if (!eventTypeKey) return statsData.detected_events;
+
+    return statsData.detected_events.filter(event => event.event_type === eventTypeKey);
+  };
+
+  // Obtener filtros disponibles desde event_distribution
+  const getAvailableFilters = () => {
+    if (!statsData || !statsData.event_distribution) return [];
+    return statsData.event_distribution.map(event => 
+      EVENT_TYPE_MAPPING[event.event_type] || event.event_type
+    );
+  };
+
+  // Formatear timestamp a formato legible (MM:SS)
+  const formatTimestamp = (timestamp) => {
+    if (typeof timestamp !== 'number') return '00:00';
+    const minutes = Math.floor(timestamp / 60);
+    const seconds = Math.floor(timestamp % 60);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const generalStats = getGeneralStats();
+  const filteredEvents = getFilteredEvents();
+  const filters = getAvailableFilters();
+  const totalEvents = statsData?.summary?.total_events || 0;
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-background-light dark:bg-background-dark">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <LoadingSpinner size="xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen bg-background-light dark:bg-background-dark">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+            <BackButton to="/library" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!statsData) {
+    return (
+      <div className="flex h-screen bg-background-light dark:bg-background-dark">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-slate-600 dark:text-slate-400 mb-4">No hay datos disponibles</p>
+            <BackButton to="/library" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background-light dark:bg-background-dark">
@@ -62,124 +182,225 @@ const DetailedStats = () => {
           <div className="max-w-7xl mx-auto px-6 py-8">
             {/* Header con botón de retroceso */}
             <div className="mb-8">
-              <BackButton to="/" className="mb-4" />
+              <BackButton to="/library" className="mb-4" />
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                Estadísticas del Equipo
+                Estadísticas del Video
               </h1>
               <p className="text-slate-600 dark:text-slate-400">
-                Equipo A vs Equipo B - 15 de Enero, 2024
+                {statsData.video?.filename || 'Video'} 
+                {statsData.summary && ` - ${totalEvents} eventos detectados`}
               </p>
             </div>
 
-            {/* Filtros */}
-            <div className="mb-6">
-              <div className="flex space-x-1 border-b border-slate-200 dark:border-slate-700">
-                {filters.map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setSelectedFilter(filter)}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      selectedFilter === filter
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Estadísticas principales */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Puntos por Jugador */}
-              <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                  Puntos por Jugador
-                </h3>
-                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">120</div>
-                <div className="text-sm text-green-600 dark:text-green-400 mb-4">
-                  Últimos 5 partidos +15%
-                </div>
-                <div className="h-32 flex items-end gap-2">
-                  {['Alex', 'Ben', 'Chris', 'David', 'Ethan'].map((player, index) => {
-                    const heights = [80, 95, 60, 90, 85];
-                    return (
-                      <div key={player} className="flex-1 flex flex-col items-center">
-                        <div 
-                          className="w-full bg-primary rounded-t mb-2"
-                          style={{ height: `${heights[index]}px` }}
-                        ></div>
-                        <span className="text-xs text-slate-600 dark:text-slate-400">{player}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Puntos por Partido */}
-              <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                  Puntos por Partido
-                </h3>
-                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">35</div>
-                <div className="text-sm text-red-600 dark:text-red-400 mb-4">
-                  Última temporada -5%
-                </div>
-                <div className="h-32 flex items-end gap-2">
-                  {['Partido 1', 'Partido 2', 'Partido 3', 'Partido 4', 'Partido 5'].map((match, index) => {
-                    const heights = [40, 100, 35, 45, 38];
-                    return (
-                      <div key={match} className="flex-1 flex flex-col items-center">
-                        <div 
-                          className="w-full bg-primary rounded-t mb-2"
-                          style={{ height: `${heights[index]}px` }}
-                        ></div>
-                        <span className="text-xs text-slate-600 dark:text-slate-400">{match}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Análisis de Recepciones */}
-            <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                Análisis de Recepciones
-              </h3>
-              <div className="mb-4">
-                <h4 className="text-base font-medium text-slate-800 dark:text-slate-200 mb-2">
-                  Recepciones por Jugador
-                </h4>
-                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">85</div>
-                <div className="text-sm text-green-600 dark:text-green-400 mb-4">
-                  Últimos 5 partidos +10%
-                </div>
-              </div>
-              <div className="space-y-3">
-                {['Alex', 'Ben', 'Chris', 'David', 'Ethan'].map((player, index) => {
-                  const widths = [45, 80, 35, 90, 70];
-                  const values = [12, 18, 8, 20, 15];
-                  return (
-                    <div key={player} className="flex items-center">
-                      <span className="text-sm text-slate-600 dark:text-slate-400 w-16">{player}</span>
-                      <div className="flex-1 mx-4">
-                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{ width: `${widths[index]}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium text-slate-900 dark:text-white w-8">
-                        {values[index]}
-                      </span>
+            {/* Resumen general */}
+            {statsData.summary && (
+              <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {statsData.summary.total_events || 0}
                     </div>
-                  );
-                })}
+                    <div className="text-sm text-slate-600 dark:text-slate-400">Total de Eventos</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {statsData.summary.total_event_types || 0}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">Tipos de Eventos</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {statsData.summary.unique_event_types?.length || 0}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">Eventos Únicos</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Filtros */}
+            {filters.length > 0 && (
+              <div className="mb-6">
+                <div className="flex space-x-1 border-b border-slate-200 dark:border-slate-700">
+                  {filters.map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setSelectedFilter(filter)}
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                        selectedFilter === filter
+                          ? 'border-primary text-primary'
+                          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+                      }`}
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Estadísticas principales - Distribución de Eventos */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Distribución de Eventos */}
+              <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Distribución de Eventos
+                </h3>
+                {generalStats.length > 0 ? (
+                  <>
+                    <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                      {totalEvents}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Total de eventos detectados
+                    </div>
+                    <div className="space-y-3">
+                      {generalStats.map((stat, index) => {
+                        const maxValue = Math.max(...generalStats.map(s => s.value));
+                        const heightPercentage = maxValue > 0 ? (stat.value / maxValue) * 100 : 0;
+                        return (
+                          <div key={stat.event_type || index} className="flex items-center">
+                            <span className="text-sm text-slate-600 dark:text-slate-400 w-24">
+                              {stat.label}
+                            </span>
+                            <div className="flex-1 mx-4">
+                              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                <div 
+                                  className="bg-primary h-2 rounded-full transition-all"
+                                  style={{ width: `${heightPercentage}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                            <span className="text-sm font-medium text-slate-900 dark:text-white w-12 text-right">
+                              {stat.value}
+                            </span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 w-12 text-right">
+                              ({stat.percentage}%)
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-400">No hay datos de distribución disponibles</p>
+                )}
+              </div>
+
+              {/* Confianza Promedio por Evento */}
+              <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Confianza Promedio
+                </h3>
+                {generalStats.length > 0 ? (
+                  <>
+                    <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                      {generalStats.reduce((sum, s) => sum + s.average_confidence, 0) / generalStats.length * 100 || 0}
+                      <span className="text-lg">%</span>
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      Confianza promedio de detección
+                    </div>
+                    <div className="space-y-3">
+                      {generalStats.map((stat, index) => {
+                        const confidencePercent = Math.round(stat.average_confidence * 100);
+                        return (
+                          <div key={stat.event_type || index} className="flex items-center">
+                            <span className="text-sm text-slate-600 dark:text-slate-400 w-24">
+                              {stat.label}
+                            </span>
+                            <div className="flex-1 mx-4">
+                              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                <div 
+                                  className="bg-green-500 h-2 rounded-full transition-all"
+                                  style={{ width: `${confidencePercent}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                            <span className="text-sm font-medium text-slate-900 dark:text-white w-12 text-right">
+                              {confidencePercent}%
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-400">No hay datos de confianza disponibles</p>
+                )}
               </div>
             </div>
+
+            {/* Eventos Detectados */}
+            {filteredEvents.length > 0 && (
+              <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Eventos Detectados {selectedFilter && `- ${selectedFilter}`}
+                </h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {filteredEvents.slice(0, 50).map((event, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">
+                          {formatTimestamp(event.timestamp)}
+                        </span>
+                        <span className="text-sm text-slate-600 dark:text-slate-400">
+                          {EVENT_TYPE_MAPPING[event.event_type] || event.event_type}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          Confianza: {Math.round((event.confidence || 0) * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  {filteredEvents.length > 50 && (
+                    <p className="text-sm text-slate-600 dark:text-slate-400 text-center mt-4">
+                      Mostrando los primeros 50 de {filteredEvents.length} eventos
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Información del Video */}
+            {statsData.analysis && (
+              <div className="mt-6 bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Información del Análisis
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="text-slate-600 dark:text-slate-400">Duración:</span>
+                    <div className="text-slate-900 dark:text-white font-medium">
+                      {statsData.analysis.duration ? `${Math.round(statsData.analysis.duration)}s` : 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 dark:text-slate-400">FPS:</span>
+                    <div className="text-slate-900 dark:text-white font-medium">
+                      {statsData.analysis.fps || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 dark:text-slate-400">Clase:</span>
+                    <div className="text-slate-900 dark:text-white font-medium">
+                      {statsData.analysis.class_name || statsData.analysis.predicted_class || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 dark:text-slate-400">Confianza:</span>
+                    <div className="text-slate-900 dark:text-white font-medium">
+                      {statsData.analysis.confidence ? `${Math.round(statsData.analysis.confidence * 100)}%` : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
