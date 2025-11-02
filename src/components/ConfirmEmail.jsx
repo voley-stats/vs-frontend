@@ -34,9 +34,34 @@ const ConfirmEmail = () => {
       localStorage.setItem('user', JSON.stringify(response.user));
       localStorage.setItem('token', response.token);
       
-      // Redirigir al login después de 2 segundos
+      // Si es un coach, verificar si tiene perfil completo antes de redirigir
+      if (response.user.role === 'coach') {
+        try {
+          // Verificar si el perfil del coach está completo
+          const { coachProfileService } = await import('../services/coachProfileService');
+          const profileCheck = await coachProfileService.checkProfileComplete();
+          
+          if (!profileCheck.isComplete) {
+            // Perfil incompleto - redirigir a completar perfil
+            // Usar window.location para forzar recarga y que AuthContext detecte el usuario
+            setTimeout(() => {
+              window.location.href = '/complete-profile';
+            }, 2000);
+            return;
+          }
+        } catch (profileError) {
+          // Si no existe el perfil o hay error, asumir que necesita completarlo
+          console.log('Perfil no encontrado, redirigiendo a completar perfil');
+          setTimeout(() => {
+            window.location.href = '/complete-profile';
+          }, 2000);
+          return;
+        }
+      }
+      
+      // Si ya tiene perfil completo o no es coach, redirigir al dashboard
       setTimeout(() => {
-        navigate('/login');
+        window.location.href = '/';
       }, 2000);
       
     } catch (error) {
@@ -108,19 +133,34 @@ const ConfirmEmail = () => {
               ¡Email Confirmado!
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              Tu cuenta ha sido activada exitosamente. Ahora puedes iniciar sesión y completar tu perfil de entrenador.
+              {user?.role === 'coach' 
+                ? 'Tu cuenta ha sido activada exitosamente. Te redirigiremos para completar tu perfil de entrenador.'
+                : 'Tu cuenta ha sido activada exitosamente. Te redirigiremos al dashboard.'
+              }
             </p>
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6">
               <p className="text-blue-800 dark:text-blue-200 text-sm">
-                Te redirigiremos automáticamente al login en unos segundos...
+                {user?.role === 'coach'
+                  ? 'Te redirigiremos automáticamente en unos segundos...'
+                  : 'Te redirigiremos automáticamente al dashboard en unos segundos...'
+                }
               </p>
             </div>
-            <button
-              onClick={() => navigate('/login')}
-              className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Ir al Login
-            </button>
+            {user?.role === 'coach' ? (
+              <button
+                onClick={() => window.location.href = '/complete-profile'}
+                className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Completar Perfil Ahora
+              </button>
+            ) : (
+              <button
+                onClick={() => window.location.href = '/'}
+                className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Ir al Dashboard
+              </button>
+            )}
           </div>
         </div>
       </div>
