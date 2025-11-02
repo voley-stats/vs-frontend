@@ -110,9 +110,8 @@ const CompleteCoachProfile = () => {
       updateProfileComplete(true);
       
       // Redirigir al dashboard después de 2 segundos
-      // Usar window.location para forzar recarga y que el AuthContext detecte el cambio
       setTimeout(() => {
-        window.location.href = '/';
+        navigate('/');
       }, 2000);
 
     } catch (err) {

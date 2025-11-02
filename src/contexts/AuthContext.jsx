@@ -29,10 +29,27 @@ export const AuthProvider = ({ children }) => {
           // Verificar si el token sigue siendo válido
           const data = await authService.verifyToken();
           if (data && data.valid) {
-            setUser(data.user);
+            const loadedUser = data.user;
+            setUser(loadedUser);
             
-            // Para todos los roles, considerar el perfil como completo por defecto
-            setProfileComplete(true);
+            // Verificar si el perfil está completo según el rol
+            if (loadedUser.role === 'coach') {
+              try {
+                const profileCheck = await coachProfileService.checkProfileComplete();
+                setProfileComplete(profileCheck.isComplete);
+              } catch (profileError) {
+                // Si no existe el perfil o hay error, asumir que no está completo
+                console.log('Perfil de coach no encontrado o error al verificar:', profileError);
+                setProfileComplete(false);
+              }
+            } else if (loadedUser.role === 'assistant') {
+              // Para assistants, considerar el perfil como completo por ahora
+              // (aquí se podría verificar también si fuera necesario)
+              setProfileComplete(true);
+            } else {
+              // Para otros roles (admin, user), considerar como completo
+              setProfileComplete(true);
+            }
           } else {
             // Token inválido, limpiar localStorage
             authService.logout();
@@ -140,6 +157,13 @@ export const AuthProvider = ({ children }) => {
     setProfileComplete(isComplete);
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -148,7 +172,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     hasRole,
     hasPermission,
-    updateProfileComplete
+    updateProfileComplete,
+    setUser: updateUser
   };
 
   return (

@@ -7,8 +7,10 @@ export const useNavigationReset = (user, loading) => {
   useEffect(() => {
     // Solo ejecutar cuando el usuario se autentica y no está cargando
     if (user && !loading) {
-      // NO redirigir si estamos en la pantalla de completar perfil
-      if (location.pathname === '/complete-profile') {
+      // NO redirigir si estamos en la pantalla de completar perfil o confirmar email
+      if (location.pathname === '/complete-profile' || 
+          location.pathname === '/complete-assistant-profile' || 
+          location.pathname === '/confirm-email') {
         return;
       }
 

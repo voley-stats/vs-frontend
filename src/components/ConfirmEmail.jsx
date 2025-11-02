@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 
 const ConfirmEmail = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { setUser: setAuthUser, updateProfileComplete } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -34,6 +36,9 @@ const ConfirmEmail = () => {
       localStorage.setItem('user', JSON.stringify(response.user));
       localStorage.setItem('token', response.token);
       
+      // Actualizar el contexto de autenticación
+      setAuthUser(response.user);
+      
       // Si es un coach, verificar si tiene perfil completo antes de redirigir
       if (response.user.role === 'coach') {
         try {
@@ -41,28 +46,31 @@ const ConfirmEmail = () => {
           const { coachProfileService } = await import('../services/coachProfileService');
           const profileCheck = await coachProfileService.checkProfileComplete();
           
+          // Actualizar el estado del perfil en el contexto
+          updateProfileComplete(profileCheck.isComplete);
+          
           if (!profileCheck.isComplete) {
             // Perfil incompleto - redirigir a completar perfil
-            // Usar window.location para forzar recarga y que AuthContext detecte el usuario
-            setTimeout(() => {
-              window.location.href = '/complete-profile';
-            }, 2000);
+            // Dar tiempo para que el contexto se actualice
+            await new Promise(resolve => setTimeout(resolve, 100));
+            navigate('/complete-profile');
             return;
           }
         } catch (profileError) {
           // Si no existe el perfil o hay error, asumir que necesita completarlo
           console.log('Perfil no encontrado, redirigiendo a completar perfil');
-          setTimeout(() => {
-            window.location.href = '/complete-profile';
-          }, 2000);
+          updateProfileComplete(false);
+          // Dar tiempo para que el contexto se actualice
+          await new Promise(resolve => setTimeout(resolve, 100));
+          navigate('/complete-profile');
           return;
         }
       }
       
       // Si ya tiene perfil completo o no es coach, redirigir al dashboard
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
+      updateProfileComplete(true);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      navigate('/');
       
     } catch (error) {
       console.error('Error confirmando email:', error);
@@ -141,21 +149,42 @@ const ConfirmEmail = () => {
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6">
               <p className="text-blue-800 dark:text-blue-200 text-sm">
                 {user?.role === 'coach'
-                  ? 'Te redirigiremos automáticamente en unos segundos...'
-                  : 'Te redirigiremos automáticamente al dashboard en unos segundos...'
+                  ? 'Redirigiendo para completar tu perfil...'
+                  : 'Redirigiendo al dashboard...'
                 }
               </p>
             </div>
             {user?.role === 'coach' ? (
               <button
-                onClick={() => window.location.href = '/complete-profile'}
+                onClick={async () => {
+                  // Verificar perfil y actualizar contexto antes de navegar
+                  try {
+                    const { coachProfileService } = await import('../services/coachProfileService');
+                    const profileCheck = await coachProfileService.checkProfileComplete();
+                    updateProfileComplete(profileCheck.isComplete);
+                    // Dar tiempo para que el contexto se actualice
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    if (!profileCheck.isComplete) {
+                      navigate('/complete-profile');
+                    } else {
+                      navigate('/');
+                    }
+                  } catch (error) {
+                    updateProfileComplete(false);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    navigate('/complete-profile');
+                  }
+                }}
                 className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 Completar Perfil Ahora
               </button>
             ) : (
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={async () => {
+                  await new Promise(resolve => setTimeout(resolve, 100));
+                  navigate('/');
+                }}
                 className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 Ir al Dashboard
