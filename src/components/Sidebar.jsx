@@ -17,21 +17,21 @@ const Sidebar = () => {
   const baseNavigationItems = [
     {
       name: 'Resumen',
-      href: '/',
+      href: user?.role === 'assistant' ? '/' : '/',
       icon: 'bar_chart',
-      current: location.pathname === '/'
-    },
-    {
-      name: 'Estadísticas',
-      href: '/stats',
-      icon: 'show_chart',
-      current: location.pathname.startsWith('/stats')
+      current: location.pathname === '/' || location.pathname === '/assistant-dashboard'
     },
     {
       name: 'Partidos',
       href: '/library',
       icon: 'event',
       current: location.pathname === '/library'
+    },
+    {
+      name: 'Estadísticas',
+      href: '/library', // Los usuarios verán estadísticas desde la lista de partidos
+      icon: 'show_chart',
+      current: location.pathname.startsWith('/stats')
     }
   ];
 

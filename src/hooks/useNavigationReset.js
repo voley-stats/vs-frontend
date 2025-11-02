@@ -34,7 +34,7 @@ export const useNavigationReset = (user, loading) => {
       const validRoutes = {
         admin: ['/', '/upload', '/library', '/stats', '/settings', '/complete-profile', '/teams', '/profile'],
         coach: ['/', '/upload', '/library', '/stats', '/settings', '/complete-profile', '/teams', '/profile'],
-        assistant: ['/', '/upload', '/library', '/stats', '/settings', '/profile'],
+        assistant: ['/', '/assistant-dashboard', '/library', '/stats', '/settings', '/profile', '/complete-assistant-profile'],
         user: ['/', '/upload', '/library', '/stats', '/settings', '/profile']
       };
 

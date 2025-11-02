@@ -90,14 +90,18 @@ function AppContent() {
 
   // Rutas diferenciadas por rol
   if (user?.role === 'assistant') {
-    // Rutas para ayudantes
+    // Rutas para ayudantes - acceso limitado
     return (
       <Layout>
         <Routes>
           <Route path="/" element={<AssistantDashboard />} />
           <Route path="/assistant-dashboard" element={<AssistantDashboard />} />
+          <Route path="/library" element={<MatchLibrary />} />
+          <Route path="/stats/:id" element={<DetailedStats />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<UserProfilePage />} />
           <Route path="/complete-assistant-profile" element={<CompleteAssistantProfile />} />
-          <Route path="*" element={<Navigate to="/assistant-dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
     );
