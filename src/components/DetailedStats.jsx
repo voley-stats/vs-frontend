@@ -34,7 +34,7 @@ const DetailedStats = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statsData, setStatsData] = useState(null);
-  const [selectedFilter, setSelectedFilter] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('Todos');
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -68,11 +68,8 @@ const DetailedStats = () => {
         const data = await statsService.getVideoFargateStats(videoId);
         setStatsData(data);
         
-        // Establecer el primer filtro disponible como seleccionado
-        if (data.event_distribution && data.event_distribution.length > 0) {
-          const firstEvent = data.event_distribution[0];
-          setSelectedFilter(EVENT_TYPE_MAPPING[firstEvent.event_type] || firstEvent.event_type);
-        }
+        // Establecer "Todos" como filtro por defecto
+        setSelectedFilter('Todos');
       } catch (err) {
         console.error('Error obteniendo estadísticas:', err);
         setError(err.message || 'Error al cargar las estadísticas');
@@ -110,7 +107,10 @@ const DetailedStats = () => {
   const getFilteredEvents = () => {
     if (!statsData || !statsData.detected_events) return [];
     
-    if (!selectedFilter) return statsData.detected_events;
+    // Si se selecciona "Todos", mostrar todos los eventos
+    if (!selectedFilter || selectedFilter === 'Todos') {
+      return statsData.detected_events;
+    }
 
     // Encontrar el event_type correspondiente al filtro seleccionado
     // Primero buscar en el mapeo directo
@@ -245,6 +245,18 @@ const DetailedStats = () => {
             {filters.length > 0 && (
               <div className="mb-6">
                 <div className="flex space-x-1 border-b border-slate-200 dark:border-slate-700">
+                  {/* Botón "Todos" */}
+                  <button
+                    onClick={() => setSelectedFilter('Todos')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      selectedFilter === 'Todos' || !selectedFilter
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {/* Filtros por tipo de evento */}
                   {filters.map((filter) => (
                     <button
                       key={filter}
@@ -315,7 +327,7 @@ const DetailedStats = () => {
             {filteredEvents.length > 0 && (
               <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                  Eventos Detectados {selectedFilter && `- ${selectedFilter}`}
+                  Eventos Detectados {selectedFilter && selectedFilter !== 'Todos' && `- ${selectedFilter}`}
                 </h3>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {filteredEvents.slice(0, 50).map((event, index) => (
@@ -329,11 +341,6 @@ const DetailedStats = () => {
                         </span>
                         <span className="text-sm text-slate-600 dark:text-slate-400">
                           {formatEventType(event.event_type)}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          Confianza: {Math.round((event.confidence || 0) * 100)}%
                         </span>
                       </div>
                     </div>
