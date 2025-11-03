@@ -12,7 +12,9 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between whitespace-nowrap border-b border-slate-200/80 dark:border-slate-800/80 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm px-6 py-3">
       <div className="flex items-center justify-center gap-4">
-        <VoleyStatsLogo size="small" />
+        <Link to="/">
+          <VoleyStatsLogo size="small" />
+        </Link>
       </div>
       
       <nav className="hidden md:flex items-center gap-6">

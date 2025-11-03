@@ -94,7 +94,9 @@ const Sidebar = () => {
     <div className="fixed left-0 top-0 flex flex-col h-screen bg-black dark:bg-gray-dark w-64 z-50">
       {/* Logo */}
       <div className="flex items-center px-6 py-4 border-b border-gray-700">
-        <VoleyStatsLogo size="sidebar" />
+        <Link to="/">
+          <VoleyStatsLogo size="sidebar" />
+        </Link>
       </div>
 
       {/* Navigation - Ocupa todo el espacio disponible */}

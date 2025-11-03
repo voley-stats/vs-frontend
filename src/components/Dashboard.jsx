@@ -22,6 +22,23 @@ const Dashboard = () => {
     fetchRecentMatches();
   }, []);
 
+  // Función para formatear fecha sin problemas de timezone
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      // Si la fecha viene como string ISO, parsearla correctamente
+      const date = new Date(dateString);
+      // Usar UTC para evitar problemas de timezone
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error('Error formateando fecha:', error);
+      return 'N/A';
+    }
+  };
+
   const quickActions = [
     {
       title: 'Cargar Video',
@@ -116,7 +133,7 @@ const Dashboard = () => {
                             {match.home_team} vs {match.away_team}
                           </h3>
                           <p className="text-sm text-slate-600 dark:text-slate-400">
-                            {new Date(match.match_date).toLocaleDateString('es-ES')}
+                            {formatDate(match.match_date)}
                           </p>
                         </div>
                         <div className="flex items-center space-x-4">
@@ -129,9 +146,6 @@ const Dashboard = () => {
                           }`}>
                             {match.status === 'completed' ? 'Procesado' : 
                              match.status === 'processing' ? 'Procesando' : 'Pendiente'}
-                          </span>
-                          <span className="text-sm font-medium text-slate-900 dark:text-white">
-                            {match.home_score}-{match.away_score}
                           </span>
                           {match.status === 'completed' && (
                             <Link
