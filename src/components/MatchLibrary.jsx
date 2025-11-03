@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import BackButton from './BackButton';
 import { matchService } from '../services/matchService';
+import { videoService } from '../services/videoService';
 import LoadingSpinner from './LoadingSpinner';
 import { useFilters } from '../contexts/FiltersContext';
 
@@ -13,6 +14,7 @@ const MatchLibrary = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalMatches, setTotalMatches] = useState(0);
+  const [deletingVideoId, setDeletingVideoId] = useState(null);
   const matchesPerPage = 5; // 5 partidos por página para navegación más fácil
 
   // Cargar partidos del backend
@@ -105,6 +107,70 @@ const MatchLibrary = () => {
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Función para formatear fecha sin problemas de timezone
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      // Si la fecha viene como string ISO, parsearla correctamente
+      const date = new Date(dateString);
+      // Usar UTC para evitar problemas de timezone
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error('Error formateando fecha:', error);
+      return dateString;
+    }
+  };
+
+  // Función para recargar los partidos
+  const reloadMatches = async () => {
+    const queryParams = new URLSearchParams();
+    if (filters.team) queryParams.append('team', filters.team);
+    if (filters.status) {
+      let backendStatus = filters.status;
+      if (filters.status === 'Procesado') backendStatus = 'completed';
+      if (filters.status === 'Pendiente') backendStatus = 'pending';
+      queryParams.append('status', backendStatus);
+    }
+    if (filters.season) queryParams.append('tournament', filters.season);
+    if (filters.dateFrom) queryParams.append('dateFrom', filters.dateFrom);
+    if (filters.dateTo) queryParams.append('dateTo', filters.dateTo);
+    queryParams.append('page', currentPage);
+    queryParams.append('limit', matchesPerPage);
+    
+    const queryString = queryParams.toString();
+    const url = queryString ? `?${queryString}` : '';
+    const response = await matchService.getMatches(url);
+    setMatches(response.matches || []);
+    
+    if (response.pagination) {
+      setTotalPages(response.pagination.pages);
+      setTotalMatches(response.pagination.total);
+    }
+  };
+
+  // Función para eliminar video
+  const handleDeleteVideo = async (matchId, videoId) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este video? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      setDeletingVideoId(videoId);
+      await videoService.deleteVideo(videoId);
+      
+      // Recargar la lista de partidos
+      await reloadMatches();
+    } catch (error) {
+      console.error('Error eliminando video:', error);
+      alert('Error al eliminar el video: ' + (error.message || 'Error desconocido'));
+    } finally {
+      setDeletingVideoId(null);
     }
   };
 
@@ -212,40 +278,60 @@ const MatchLibrary = () => {
                         </span>
                       </div>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm text-slate-600 dark:text-slate-400">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 dark:text-slate-400">
                         <div>
-                          <span className="font-medium">Fecha:</span> {new Date(match.match_date).toLocaleDateString()}
+                          <span className="font-medium">Fecha:</span> {formatDate(match.match_date)}
                         </div>
                         <div>
                           <span className="font-medium">Torneo:</span> {match.tournament || 'N/A'}
                         </div>
                         <div>
-                          <span className="font-medium">Temporada:</span> {match.season || 'N/A'}
+                          <span className="font-medium">Temporada:</span> {match.tournament || match.season || 'N/A'}
                         </div>
                         <div>
                           <span className="font-medium">Duración:</span> {match.duration ? `${match.duration} min` : 'N/A'}
-                        </div>
-                        <div>
-                          <span className="font-medium">Video:</span> {match.video_processed ? 'Sí' : 'No'}
                         </div>
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                          {match.home_score} - {match.away_score}
-                        </div>
-                      </div>
-                      
                       {match.status === 'completed' && match.video_processed ? (
-                        <Link
-                          to={`/stats/${match.id}`}
-                          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-                        >
-                          <span className="material-symbols-outlined mr-2">visibility</span>
-                          Ver Análisis
-                        </Link>
+                        <>
+                          <Link
+                            to={`/stats/${match.id}`}
+                            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                          >
+                            <span className="material-symbols-outlined mr-2">visibility</span>
+                            Ver Análisis
+                          </Link>
+                          <button
+                            onClick={async () => {
+                              try {
+                                // Obtener los videos del match
+                                const videosResponse = await videoService.getVideosByMatch(match.id);
+                                if (videosResponse.videos && videosResponse.videos.length > 0) {
+                                  // Eliminar el primer video (o todos si hay múltiples)
+                                  for (const video of videosResponse.videos) {
+                                    await handleDeleteVideo(match.id, video.id);
+                                  }
+                                } else {
+                                  alert('No se encontraron videos para este partido');
+                                }
+                              } catch (error) {
+                                console.error('Error obteniendo videos:', error);
+                                alert('Error al obtener información del video');
+                              }
+                            }}
+                            disabled={deletingVideoId !== null}
+                            className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Eliminar video"
+                          >
+                            <span className="material-symbols-outlined mr-2">
+                              {deletingVideoId ? 'hourglass_empty' : 'delete'}
+                            </span>
+                            {deletingVideoId ? 'Eliminando...' : 'Eliminar'}
+                          </button>
+                        </>
                       ) : match.status === 'processing' ? (
                         <button
                           disabled
