@@ -113,10 +113,14 @@ const DetailedStats = () => {
     }
 
     // Encontrar el event_type correspondiente al filtro seleccionado
-    // Primero buscar en el mapeo directo
-    let eventTypeKey = Object.keys(EVENT_TYPE_MAPPING).find(
-      key => EVENT_TYPE_MAPPING[key] === selectedFilter
-    );
+    // Crear un mapeo inverso para buscar más fácilmente
+    const reverseMapping = {};
+    Object.keys(EVENT_TYPE_MAPPING).forEach(key => {
+      reverseMapping[EVENT_TYPE_MAPPING[key]] = key;
+    });
+    
+    // Buscar primero en el mapeo inverso
+    let eventTypeKey = reverseMapping[selectedFilter];
     
     // Si no está en el mapeo, buscar en event_distribution por el label formateado
     if (!eventTypeKey && statsData.event_distribution) {
@@ -128,7 +132,21 @@ const DetailedStats = () => {
       }
     }
 
-    if (!eventTypeKey) return statsData.detected_events;
+    // Si aún no encontramos el eventTypeKey, intentar buscar directamente en detected_events
+    if (!eventTypeKey) {
+      // Buscar un evento que tenga un event_type que al formatearlo coincida con el filtro
+      const foundEvent = statsData.detected_events.find(event => 
+        formatEventType(event.event_type) === selectedFilter
+      );
+      if (foundEvent) {
+        eventTypeKey = foundEvent.event_type;
+      }
+    }
+
+    if (!eventTypeKey) {
+      console.warn('No se encontró eventTypeKey para el filtro:', selectedFilter);
+      return statsData.detected_events;
+    }
 
     return statsData.detected_events.filter(event => event.event_type === eventTypeKey);
   };

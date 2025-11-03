@@ -277,11 +277,11 @@ const TeamManagement = () => {
                       <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Miembros de la categoría</h4>
                       
                       {/* Miembros activos */}
-                      {category.members && category.members.filter(m => m.is_active).length > 0 && (
+                      {category.members && category.members.filter(m => m.status === 'accepted').length > 0 && (
                         <div className="mb-4">
                           <h5 className="text-xs font-medium text-green-600 dark:text-green-400 mb-2">✅ Activos</h5>
                           <div className="space-y-2">
-                            {category.members.filter(m => m.is_active).map((member) => (
+                            {category.members.filter(m => m.status === 'accepted').map((member) => (
                               <div key={member.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700 rounded">
                                 <div className="flex items-center space-x-3">
                                   <div className="h-8 w-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
@@ -314,11 +314,11 @@ const TeamManagement = () => {
                       )}
                       
                       {/* Miembros desactivados */}
-                      {category.members && category.members.filter(m => !m.is_active).length > 0 && (
+                      {category.members && category.members.filter(m => m.status !== 'accepted').length > 0 && (
                         <div>
                           <h5 className="text-xs font-medium text-red-600 dark:text-red-400 mb-2">❌ Desactivados</h5>
                           <div className="space-y-2">
-                            {category.members.filter(m => !m.is_active).map((member) => (
+                            {category.members.filter(m => m.status !== 'accepted').map((member) => (
                               <div key={member.id} className="flex items-center justify-between py-2 px-3 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
                                 <div className="flex items-center space-x-3">
                                   <div className="h-8 w-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-medium">

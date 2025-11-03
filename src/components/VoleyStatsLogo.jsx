@@ -10,9 +10,9 @@ const VoleyStatsLogo = ({ className, showText = true, textSize = "text-xl", size
       case 'login':
         return "w-[800px] h-[200px]"; // Muy grande para login con logo recortado
       case 'sidebar':
-        return "w-80 h-20"; // Ajustado para sidebar
+        return "w-48 h-12"; // Reducido para sidebar
       case 'small':
-        return "w-48 h-12"; // Ajustado para header
+        return "w-32 h-8"; // Reducido para header
       case 'large':
         return "w-[800px] h-[200px]"; // Grande
       default:
