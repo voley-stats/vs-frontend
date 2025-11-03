@@ -127,6 +127,23 @@ const MatchLibrary = () => {
     }
   };
 
+  // Función para formatear duración (convertir segundos a formato legible)
+  const formatDuration = (seconds) => {
+    if (!seconds || isNaN(seconds)) return 'N/A';
+    const totalSeconds = Math.floor(seconds);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  };
+
   // Función para recargar los partidos
   const reloadMatches = async () => {
     const queryParams = new URLSearchParams();
@@ -292,7 +309,7 @@ const MatchLibrary = () => {
                           <span className="font-medium">Temporada:</span> {match.season ? match.season.charAt(0).toUpperCase() + match.season.slice(1) : (match.tournament || 'N/A')}
                         </div>
                         <div>
-                          <span className="font-medium">Duración:</span> {match.duration ? `${match.duration} min` : 'N/A'}
+                          <span className="font-medium">Duración:</span> {match.duration ? formatDuration(match.duration) : 'N/A'}
                         </div>
                       </div>
                     </div>

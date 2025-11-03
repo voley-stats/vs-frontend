@@ -6,7 +6,7 @@ import { statsService } from '../services/statsService';
 import { videoService } from '../services/videoService';
 import LoadingSpinner from './LoadingSpinner';
 
-// Mapeo de event_types del backend a nombres en español
+// Mapeo de event_types del backend a nombres en español (con primera letra mayúscula y plural)
 const EVENT_TYPE_MAPPING = {
   'serve': 'Saques',
   'block': 'Bloqueos',
@@ -16,6 +16,17 @@ const EVENT_TYPE_MAPPING = {
   'error': 'Errores',
   'dig': 'Defensas',
   'set': 'Colocaciones'
+};
+
+// Función para convertir event_type a nombre legible con primera letra mayúscula y plural
+const formatEventType = (eventType) => {
+  if (EVENT_TYPE_MAPPING[eventType]) {
+    return EVENT_TYPE_MAPPING[eventType];
+  }
+  // Si no está en el mapeo, convertir a formato legible
+  const formatted = eventType.charAt(0).toUpperCase() + eventType.slice(1);
+  // Agregar 's' al final si no termina en 's' para hacerlo plural
+  return formatted.endsWith('s') ? formatted : formatted + 's';
 };
 
 const DetailedStats = () => {
@@ -83,7 +94,7 @@ const DetailedStats = () => {
     return statsData.event_distribution.map(event => {
       const count = event.count || 0;
       const percentage = totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0;
-      const label = EVENT_TYPE_MAPPING[event.event_type] || event.event_type;
+      const label = formatEventType(event.event_type);
       
       return {
         label,
@@ -102,9 +113,20 @@ const DetailedStats = () => {
     if (!selectedFilter) return statsData.detected_events;
 
     // Encontrar el event_type correspondiente al filtro seleccionado
-    const eventTypeKey = Object.keys(EVENT_TYPE_MAPPING).find(
+    // Primero buscar en el mapeo directo
+    let eventTypeKey = Object.keys(EVENT_TYPE_MAPPING).find(
       key => EVENT_TYPE_MAPPING[key] === selectedFilter
     );
+    
+    // Si no está en el mapeo, buscar en event_distribution por el label formateado
+    if (!eventTypeKey && statsData.event_distribution) {
+      const event = statsData.event_distribution.find(e => 
+        formatEventType(e.event_type) === selectedFilter
+      );
+      if (event) {
+        eventTypeKey = event.event_type;
+      }
+    }
 
     if (!eventTypeKey) return statsData.detected_events;
 
@@ -115,7 +137,7 @@ const DetailedStats = () => {
   const getAvailableFilters = () => {
     if (!statsData || !statsData.event_distribution) return [];
     return statsData.event_distribution.map(event => 
-      EVENT_TYPE_MAPPING[event.event_type] || event.event_type
+      formatEventType(event.event_type)
     );
   };
 
@@ -186,10 +208,11 @@ const DetailedStats = () => {
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
                 Estadísticas del Video
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                {statsData.video?.filename || 'Video'} 
-                {statsData.summary && ` - ${totalEvents} eventos detectados`}
-              </p>
+              {statsData.summary && (
+                <p className="text-slate-600 dark:text-slate-400">
+                  {totalEvents} eventos detectados
+                </p>
+              )}
             </div>
 
             {/* Resumen general */}
@@ -240,8 +263,8 @@ const DetailedStats = () => {
             )}
 
             {/* Estadísticas principales - Distribución de Eventos */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Distribución de Eventos */}
+            <div className="mb-8">
+              {/* Distribución de Eventos - Ocupa todo el ancho */}
               <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   Distribución de Eventos
@@ -260,7 +283,7 @@ const DetailedStats = () => {
                         const heightPercentage = maxValue > 0 ? (stat.value / maxValue) * 100 : 0;
                         return (
                           <div key={stat.event_type || index} className="flex items-center">
-                            <span className="text-sm text-slate-600 dark:text-slate-400 w-24">
+                            <span className="text-sm text-slate-600 dark:text-slate-400 w-32">
                               {stat.label}
                             </span>
                             <div className="flex-1 mx-4">
@@ -271,10 +294,10 @@ const DetailedStats = () => {
                                 ></div>
                               </div>
                             </div>
-                            <span className="text-sm font-medium text-slate-900 dark:text-white w-12 text-right">
+                            <span className="text-sm font-medium text-slate-900 dark:text-white w-16 text-right">
                               {stat.value}
                             </span>
-                            <span className="text-xs text-slate-500 dark:text-slate-400 w-12 text-right">
+                            <span className="text-xs text-slate-500 dark:text-slate-400 w-16 text-right">
                               ({stat.percentage}%)
                             </span>
                           </div>
@@ -284,49 +307,6 @@ const DetailedStats = () => {
                   </>
                 ) : (
                   <p className="text-slate-600 dark:text-slate-400">No hay datos de distribución disponibles</p>
-                )}
-              </div>
-
-              {/* Confianza Promedio por Evento */}
-              <div className="bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                  Confianza Promedio
-                </h3>
-                {generalStats.length > 0 ? (
-                  <>
-                    <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                      {generalStats.reduce((sum, s) => sum + s.average_confidence, 0) / generalStats.length * 100 || 0}
-                      <span className="text-lg">%</span>
-                    </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                      Confianza promedio de detección
-                    </div>
-                    <div className="space-y-3">
-                      {generalStats.map((stat, index) => {
-                        const confidencePercent = Math.round(stat.average_confidence * 100);
-                        return (
-                          <div key={stat.event_type || index} className="flex items-center">
-                            <span className="text-sm text-slate-600 dark:text-slate-400 w-24">
-                              {stat.label}
-                            </span>
-                            <div className="flex-1 mx-4">
-                              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                                <div 
-                                  className="bg-green-500 h-2 rounded-full transition-all"
-                                  style={{ width: `${confidencePercent}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                            <span className="text-sm font-medium text-slate-900 dark:text-white w-12 text-right">
-                              {confidencePercent}%
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-slate-600 dark:text-slate-400">No hay datos de confianza disponibles</p>
                 )}
               </div>
             </div>
@@ -348,7 +328,7 @@ const DetailedStats = () => {
                           {formatTimestamp(event.timestamp)}
                         </span>
                         <span className="text-sm text-slate-600 dark:text-slate-400">
-                          {EVENT_TYPE_MAPPING[event.event_type] || event.event_type}
+                          {formatEventType(event.event_type)}
                         </span>
                       </div>
                       <div className="flex items-center space-x-4">
@@ -367,13 +347,13 @@ const DetailedStats = () => {
               </div>
             )}
 
-            {/* Información del Video */}
+            {/* Información del Análisis */}
             {statsData.analysis && (
               <div className="mt-6 bg-white dark:bg-slate-900/50 p-6 rounded-lg shadow-sm border border-slate-200/80 dark:border-slate-800/80">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   Información del Análisis
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-slate-600 dark:text-slate-400">Duración:</span>
                     <div className="text-slate-900 dark:text-white font-medium">
@@ -384,18 +364,6 @@ const DetailedStats = () => {
                     <span className="text-slate-600 dark:text-slate-400">FPS:</span>
                     <div className="text-slate-900 dark:text-white font-medium">
                       {statsData.analysis.fps || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-slate-600 dark:text-slate-400">Clase:</span>
-                    <div className="text-slate-900 dark:text-white font-medium">
-                      {statsData.analysis.class_name || statsData.analysis.predicted_class || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-slate-600 dark:text-slate-400">Confianza:</span>
-                    <div className="text-slate-900 dark:text-white font-medium">
-                      {statsData.analysis.confidence ? `${Math.round(statsData.analysis.confidence * 100)}%` : 'N/A'}
                     </div>
                   </div>
                 </div>
