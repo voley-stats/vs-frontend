@@ -52,6 +52,20 @@ export const videoService = {
     }
   },
 
+  // Eliminar video por matchId (nuevo endpoint)
+  async deleteVideoByMatch(matchId, videoId = null) {
+    try {
+      let url = `/videos/match/${matchId}`;
+      if (videoId) {
+        url += `?videoId=${videoId}`;
+      }
+      const response = await api.delete(url);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Error eliminando video');
+    }
+  },
+
   async getVideoStats() {
     try {
       const response = await api.get('/videos/stats/user');

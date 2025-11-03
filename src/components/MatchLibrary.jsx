@@ -154,15 +154,16 @@ const MatchLibrary = () => {
     }
   };
 
-  // Función para eliminar video
-  const handleDeleteVideo = async (matchId, videoId) => {
+  // Función para eliminar video por matchId (usa el nuevo endpoint)
+  const handleDeleteVideoByMatch = async (matchId) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este video? Esta acción no se puede deshacer.')) {
       return;
     }
 
     try {
-      setDeletingVideoId(videoId);
-      await videoService.deleteVideo(videoId);
+      setDeletingVideoId(matchId);
+      // Usar el nuevo endpoint que elimina por matchId
+      await videoService.deleteVideoByMatch(matchId);
       
       // Recargar la lista de partidos después de un pequeño delay para que el backend procese
       setTimeout(async () => {
@@ -288,7 +289,7 @@ const MatchLibrary = () => {
                           <span className="font-medium">Torneo:</span> {match.tournament || 'N/A'}
                         </div>
                         <div>
-                          <span className="font-medium">Temporada:</span> {match.tournament || match.season || 'N/A'}
+                          <span className="font-medium">Temporada:</span> {match.season ? match.season.charAt(0).toUpperCase() + match.season.slice(1) : (match.tournament || 'N/A')}
                         </div>
                         <div>
                           <span className="font-medium">Duración:</span> {match.duration ? `${match.duration} min` : 'N/A'}
@@ -307,44 +308,7 @@ const MatchLibrary = () => {
                             Ver Análisis
                           </Link>
                           <button
-                            onClick={async () => {
-                              try {
-                                // Obtener los videos del match
-                                const videosResponse = await videoService.getVideosByMatch(match.id);
-                                console.log('Videos obtenidos:', videosResponse);
-                                
-                                // El backend retorna { videos: [...] }
-                                let videos = [];
-                                if (videosResponse && videosResponse.videos) {
-                                  videos = videosResponse.videos;
-                                } else if (Array.isArray(videosResponse)) {
-                                  videos = videosResponse;
-                                } else if (videosResponse && videosResponse.data) {
-                                  videos = Array.isArray(videosResponse.data) ? videosResponse.data : [videosResponse.data];
-                                }
-                                
-                                console.log('Videos procesados:', videos);
-                                
-                                if (videos && videos.length > 0) {
-                                  // Eliminar todos los videos del match
-                                  for (const video of videos) {
-                                    const videoId = video.id;
-                                    if (videoId) {
-                                      await handleDeleteVideo(match.id, videoId);
-                                    } else {
-                                      console.warn('Video sin ID:', video);
-                                    }
-                                  }
-                                } else {
-                                  console.warn('No se encontraron videos. Respuesta:', videosResponse);
-                                  alert('No se encontraron videos para este partido. Verifica que el partido tenga videos asociados.');
-                                }
-                              } catch (error) {
-                                console.error('Error obteniendo videos:', error);
-                                console.error('Respuesta completa:', error);
-                                alert('Error al obtener información del video: ' + (error.message || 'Error desconocido'));
-                              }
-                            }}
+                            onClick={() => handleDeleteVideoByMatch(match.id)}
                             disabled={deletingVideoId !== null}
                             className="inline-flex items-center justify-center p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Eliminar video"
@@ -355,21 +319,48 @@ const MatchLibrary = () => {
                           </button>
                         </>
                       ) : match.status === 'processing' ? (
-                        <button
-                          disabled
-                          className="inline-flex items-center px-4 py-2 bg-blue-300 dark:bg-blue-600 text-blue-500 dark:text-blue-400 rounded-md cursor-not-allowed"
-                        >
-                          <span className="material-symbols-outlined mr-2">schedule</span>
-                          Procesando...
-                        </button>
+                        <>
+                          <button
+                            disabled
+                            className="inline-flex items-center px-4 py-2 bg-blue-300 dark:bg-blue-600 text-blue-500 dark:text-blue-400 rounded-md cursor-not-allowed"
+                          >
+                            <span className="material-symbols-outlined mr-2">schedule</span>
+                            Procesando...
+                          </button>
+                          <button
+                            onClick={() => handleDeleteVideoByMatch(match.id)}
+                            disabled={deletingVideoId !== null}
+                            className="inline-flex items-center justify-center p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Eliminar video"
+                          >
+                            <span className="material-symbols-outlined">
+                              {deletingVideoId ? 'hourglass_empty' : 'delete'}
+                            </span>
+                          </button>
+                        </>
                       ) : (
-                        <button
-                          disabled
-                          className="inline-flex items-center px-4 py-2 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 rounded-md cursor-not-allowed"
-                        >
-                          <span className="material-symbols-outlined mr-2">pending</span>
-                          Pendiente
-                        </button>
+                        <>
+                          <button
+                            disabled
+                            className="inline-flex items-center px-4 py-2 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 rounded-md cursor-not-allowed"
+                          >
+                            <span className="material-symbols-outlined mr-2">pending</span>
+                            Pendiente
+                          </button>
+                          {/* Permitir eliminar videos pendientes también */}
+                          {match.video_path && (
+                            <button
+                              onClick={() => handleDeleteVideoByMatch(match.id)}
+                              disabled={deletingVideoId !== null}
+                              className="inline-flex items-center justify-center p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Eliminar video"
+                            >
+                              <span className="material-symbols-outlined">
+                                {deletingVideoId ? 'hourglass_empty' : 'delete'}
+                              </span>
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
