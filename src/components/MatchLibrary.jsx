@@ -164,8 +164,10 @@ const MatchLibrary = () => {
       setDeletingVideoId(videoId);
       await videoService.deleteVideo(videoId);
       
-      // Recargar la lista de partidos
-      await reloadMatches();
+      // Recargar la lista de partidos después de un pequeño delay para que el backend procese
+      setTimeout(async () => {
+        await reloadMatches();
+      }, 500);
     } catch (error) {
       console.error('Error eliminando video:', error);
       alert('Error al eliminar el video: ' + (error.message || 'Error desconocido'));
@@ -309,27 +311,47 @@ const MatchLibrary = () => {
                               try {
                                 // Obtener los videos del match
                                 const videosResponse = await videoService.getVideosByMatch(match.id);
-                                if (videosResponse.videos && videosResponse.videos.length > 0) {
-                                  // Eliminar el primer video (o todos si hay múltiples)
-                                  for (const video of videosResponse.videos) {
-                                    await handleDeleteVideo(match.id, video.id);
+                                console.log('Videos obtenidos:', videosResponse);
+                                
+                                // El backend retorna { videos: [...] }
+                                let videos = [];
+                                if (videosResponse && videosResponse.videos) {
+                                  videos = videosResponse.videos;
+                                } else if (Array.isArray(videosResponse)) {
+                                  videos = videosResponse;
+                                } else if (videosResponse && videosResponse.data) {
+                                  videos = Array.isArray(videosResponse.data) ? videosResponse.data : [videosResponse.data];
+                                }
+                                
+                                console.log('Videos procesados:', videos);
+                                
+                                if (videos && videos.length > 0) {
+                                  // Eliminar todos los videos del match
+                                  for (const video of videos) {
+                                    const videoId = video.id;
+                                    if (videoId) {
+                                      await handleDeleteVideo(match.id, videoId);
+                                    } else {
+                                      console.warn('Video sin ID:', video);
+                                    }
                                   }
                                 } else {
-                                  alert('No se encontraron videos para este partido');
+                                  console.warn('No se encontraron videos. Respuesta:', videosResponse);
+                                  alert('No se encontraron videos para este partido. Verifica que el partido tenga videos asociados.');
                                 }
                               } catch (error) {
                                 console.error('Error obteniendo videos:', error);
-                                alert('Error al obtener información del video');
+                                console.error('Respuesta completa:', error);
+                                alert('Error al obtener información del video: ' + (error.message || 'Error desconocido'));
                               }
                             }}
                             disabled={deletingVideoId !== null}
-                            className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="inline-flex items-center justify-center p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Eliminar video"
                           >
-                            <span className="material-symbols-outlined mr-2">
+                            <span className="material-symbols-outlined">
                               {deletingVideoId ? 'hourglass_empty' : 'delete'}
                             </span>
-                            {deletingVideoId ? 'Eliminando...' : 'Eliminar'}
                           </button>
                         </>
                       ) : match.status === 'processing' ? (
