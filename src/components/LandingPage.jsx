@@ -300,7 +300,7 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-slate-900 dark:text-white">Resultados Comprobados</h4>
-                    <p className="text-gray-600 dark:text-gray-300">Más de 500 equipos confían en nosotros</p>
+                    <p className="text-gray-600 dark:text-gray-300">Equipos confían en nosotros</p>
                   </div>
                 </div>
               </div>
@@ -308,7 +308,7 @@ const LandingPage = () => {
             
             <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-lg">
               <div className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-24 h-24 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <VoleyStatsLogo size="small" />
                 </div>
                 <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
@@ -321,12 +321,10 @@ const LandingPage = () => {
                 </p>
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">500+</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-300">Equipos Activos</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-300 font-medium">Equipos Activos</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">50K+</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-300">Partidos Analizados</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-300 font-medium">Partidos Analizados</div>
                   </div>
                 </div>
               </div>
