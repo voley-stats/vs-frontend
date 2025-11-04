@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePreferences } from '../contexts/PreferencesContext';
+import { profileService } from '../services/profileService';
 import BackButton from './BackButton';
 
 const Settings = () => {
@@ -12,11 +13,8 @@ const Settings = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    team: user?.team || '',
-    position: user?.position || '',
-    bio: user?.bio || ''
+    username: user?.username || '',
+    email: user?.email || ''
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -37,6 +35,16 @@ const Settings = () => {
     { id: 'display', label: 'Pantalla', icon: 'palette' },
     { id: 'privacy', label: 'Privacidad', icon: 'security' }
   ];
+
+  // Actualizar profileData cuando cambie el usuario
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        username: user?.username || '',
+        email: user?.email || ''
+      });
+    }
+  }, [user]);
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -68,11 +76,15 @@ const Settings = () => {
     setMessage('');
     
     try {
-      // Aquí iría la lógica para actualizar el perfil
-      console.log('Actualizando perfil:', profileData);
+      const response = await profileService.updateProfile(profileData);
       setMessage('Perfil actualizado correctamente');
+      // Actualizar el usuario en el contexto si es necesario
+      if (response.user) {
+        // El contexto se actualizará automáticamente en el próximo login
+      }
     } catch (error) {
-      setMessage('Error al actualizar el perfil');
+      console.error('Error actualizando perfil:', error);
+      setMessage(error.message || 'Error al actualizar el perfil');
     } finally {
       setLoading(false);
     }
@@ -113,14 +125,14 @@ const Settings = () => {
     <form onSubmit={handleSaveProfile} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Nombre Completo
+          <label htmlFor="username" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Nombre de Usuario
           </label>
           <input
             type="text"
-            id="name"
-            name="name"
-            value={profileData.name}
+            id="username"
+            name="username"
+            value={profileData.username}
             onChange={handleProfileChange}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             required
@@ -141,55 +153,12 @@ const Settings = () => {
             required
           />
         </div>
-
-        <div>
-          <label htmlFor="team" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Equipo
-          </label>
-          <input
-            type="text"
-            id="team"
-            name="team"
-            value={profileData.team}
-            onChange={handleProfileChange}
-            placeholder="Nombre de tu equipo"
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="position" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Posición
-          </label>
-          <select
-            id="position"
-            name="position"
-            value={profileData.position}
-            onChange={handleProfileChange}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
-            <option value="">Seleccionar posición</option>
-            <option value="entrenador">Entrenador</option>
-            <option value="asistente">Asistente</option>
-            <option value="analista">Analista</option>
-            <option value="director">Director Técnico</option>
-          </select>
-        </div>
       </div>
 
-      <div>
-        <label htmlFor="bio" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Biografía
-        </label>
-        <textarea
-          id="bio"
-          name="bio"
-          value={profileData.bio}
-          onChange={handleProfileChange}
-          rows={4}
-          placeholder="Cuéntanos sobre tu experiencia en el voleibol..."
-          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-        />
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          <strong>Nota:</strong> Solo puedes actualizar tu nombre de usuario y correo electrónico. Para cambiar otros datos de tu perfil, contacta con un administrador.
+        </p>
       </div>
 
       <div className="flex justify-end">
