@@ -25,13 +25,7 @@ const Sidebar = () => {
       name: 'Partidos',
       href: '/library',
       icon: 'event',
-      current: location.pathname === '/library'
-    },
-    {
-      name: 'Estadísticas',
-      href: '/library', // Los usuarios verán estadísticas desde la lista de partidos
-      icon: 'show_chart',
-      current: location.pathname.startsWith('/stats')
+      current: location.pathname === '/library' || location.pathname.startsWith('/stats')
     }
   ];
 
