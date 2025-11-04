@@ -257,7 +257,7 @@ const TeamManagement = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-xl font-semibold text-black dark:text-white">{category.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Categoría: {category.division} - {category.gender}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Categoría: {category.division} - {category.gender ? category.gender.charAt(0).toUpperCase() + category.gender.slice(1).toLowerCase() : category.gender}</p>
                       </div>
                       <div className="flex space-x-2">
                         <button
