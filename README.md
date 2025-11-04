@@ -7,9 +7,12 @@ Una aplicación web moderna para el análisis inteligente de partidos de voleibo
 - **Diseño Moderno**: Interfaz oscura con colores personalizados y tipografía Space Grotesk
 - **Responsive**: Adaptable a dispositivos móviles, tablets y desktop
 - **Componentes Modulares**: Arquitectura basada en componentes React reutilizables
-- **Estadísticas en Tiempo Real**: Visualización de métricas de partidos
-- **Videos Destacados**: Galería de momentos clave del partido
-- **Selección de Jugadores**: Análisis individual por jugador
+- **Análisis Near Real Time**: Procesamiento y análisis automático de videos de partidos
+- **Gestión de Equipos**: Sistema de invitaciones y gestión de ayudantes por categorías
+- **Estadísticas Detalladas**: Visualización de eventos detectados, distribución de eventos y métricas de análisis
+- **Autenticación Completa**: Sistema de registro, login, confirmación de email y recuperación de contraseña
+- **Perfiles de Usuario**: Perfiles diferenciados para coaches y assistants
+- **Configuración Personalizable**: Preferencias de tema, tamaño de fuente y notificaciones
 
 ## 🛠️ Tecnologías
 
@@ -95,32 +98,47 @@ cp env.example .env
 
 ## 🎨 Componentes Principales
 
-### Header
-- Logo y navegación principal
-- Menú responsivo
-- Perfil de usuario
+### Autenticación y Registro
+- **Login**: Inicio de sesión con email y contraseña
+- **Register**: Registro de nuevos usuarios (coaches)
+- **ConfirmEmail**: Confirmación de email después del registro
+- **ForgotPassword / ResetPassword**: Recuperación de contraseña
+- **TeamInvitation**: Aceptación de invitaciones para assistants
 
-### Sidebar
-- Métricas generales del partido
-- Estadísticas por jugador
-- Selector de jugadores
+### Dashboard y Navegación
+- **Dashboard**: Vista de resumen con partidos recientes
+- **Sidebar**: Navegación principal con filtros para partidos
+- **Header**: Logo clickeable y perfil de usuario
 
-### Charts
-- Gráficos de puntos por set
-- Visualización de errores
-- Datos interactivos
+### Gestión de Partidos
+- **MatchLibrary**: Lista de partidos con filtros (fecha, equipo, temporada, estado)
+- **DetailedStats**: Estadísticas detalladas de un partido con eventos detectados
+- **VideoUpload**: Subida de videos para análisis (solo coaches)
 
-### VideoGrid
-- Galería de videos destacados
-- Efectos hover
-- Thumbnails responsivos
+### Gestión de Equipos
+- **TeamManagement**: Gestión de ayudantes por categorías (solo coaches)
+- **CompleteCoachProfile**: Completar perfil de entrenador con categorías
+- **CompleteAssistantProfile**: Completar perfil de asistente
 
-## 🎯 Funcionalidades
+### Configuración
+- **Settings**: Configuración de perfil, preferencias, privacidad y notificaciones
+- **UserProfilePage**: Visualización y edición del perfil de usuario
 
-- **Tema Oscuro**: Diseño optimizado para análisis de datos
-- **Navegación Intuitiva**: Menú claro y accesible
-- **Datos Dinámicos**: Estadísticas actualizables
-- **Responsive Design**: Adaptable a todos los dispositivos
+## 🎯 Funcionalidades por Rol
+
+### Coaches (Entrenadores)
+- ✅ Subir videos de partidos
+- ✅ Ver análisis detallados de partidos
+- ✅ Gestionar equipos y categorías
+- ✅ Invitar y gestionar ayudantes
+- ✅ Ver estadísticas y eventos detectados
+- ✅ Completar perfil con club e instituciones
+
+### Assistants (Ayudantes)
+- ✅ Ver lista de partidos asignados
+- ✅ Ver análisis detallados de partidos
+- ✅ Configurar preferencias personales
+- ✅ Acceso limitado según permisos
 
 ## 📱 Responsive Breakpoints
 
@@ -140,36 +158,36 @@ cp env.example .env
 
 ```
 src/
-├── components/
-│   ├── Header.jsx
-│   ├── Sidebar.jsx
-│   ├── Charts.jsx
-│   └── VideoGrid.jsx
-├── assets/
-├── App.jsx
-├── main.jsx
-└── index.css
+├── components/          # Componentes React
+│   ├── Auth/           # Componentes de autenticación
+│   ├── Dashboard/      # Componentes del dashboard
+│   ├── Match/          # Componentes de partidos
+│   └── Settings/       # Componentes de configuración
+├── services/           # Servicios de API
+├── contexts/           # Contextos de React (Auth, Preferences, Filters)
+├── hooks/              # Hooks personalizados
+├── assets/             # Recursos estáticos (logos, imágenes)
+├── App.jsx             # Componente principal con rutas
+└── main.jsx            # Punto de entrada
 ```
 
 ## 🚀 Desarrollo
 
-### Estructura del Proyecto
+### Variables de Entorno Requeridas
+
+La aplicación requiere configurar `VITE_API_URL` en un archivo `.env`:
+
+```env
+VITE_API_URL=http://localhost:3001/api
 ```
-src/
-├── components/          # Componentes React
-├── services/           # Servicios de API
-├── contexts/           # Contextos de React
-├── hooks/              # Hooks personalizados
-├── assets/             # Recursos estáticos
-├── App.jsx             # Componente principal
-└── main.jsx            # Punto de entrada
-```
+
+Para más detalles, consulta `SETUP.md` o `VARIABLES.md`.
 
 ### Configuración de Desarrollo
 
 1. **Configurar el backend:**
    - Asegúrate de que el backend esté ejecutándose en `http://localhost:3001`
-   - O configura `VITE_API_URL` en tu archivo `.env`
+   - Configura `VITE_API_URL` en tu archivo `.env` (ver `SETUP.md`)
 
 2. **Configurar el editor:**
    - Instala las extensiones de ESLint y Prettier
@@ -178,7 +196,11 @@ src/
 3. **Debugging:**
    - Usa las herramientas de desarrollo de React
    - Revisa la consola del navegador para errores
-   - Usa `console.log` para debugging temporal
+   - Verifica las variables de entorno con `import.meta.env.VITE_API_URL`
+
+### Deploy
+
+Para desplegar en Vercel, consulta `VERCEL_DEPLOY.md` para instrucciones detalladas.
 
 ## 📄 Licencia
 

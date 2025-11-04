@@ -70,17 +70,9 @@ VITE_API_URL=https://api.voleystats.com/api
 VITE_DEV_MODE=false
 ```
 
-**3. URLs Hardcodeadas Corregidas**
+**3. URLs Hardcodeadas**
 
-✅ **Ya corregido**: La URL hardcodeada en `TeamManagement.jsx` ahora usa `VITE_API_URL`:
-```javascript
-// Antes (hardcodeado):
-const response = await fetch('http://localhost:3001/api/categories', {
-
-// Ahora (usando variable de entorno):
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const response = await fetch(`${API_URL}/categories`, {
-```
+✅ **Todas las URLs hardcodeadas han sido corregidas**: Todos los componentes ahora usan `VITE_API_URL` desde las variables de entorno. No hay URLs hardcodeadas en el código.
 
 **4. Archivo de Configuración Completo**
 
@@ -161,14 +153,20 @@ npm run build
 
 ```
 vs-frontend/
-├── .env                 # Variables de entorno (crear)
-├── config.example.js    # Configuración de ejemplo
+├── .env                 # Variables de entorno (crear, no está en git)
+├── env.example          # Ejemplo de variables de entorno
+├── config.example.js    # Configuración de ejemplo (legacy)
 ├── vite.config.js       # Configuración de Vite
 ├── tailwind.config.js   # Configuración de Tailwind
+├── vercel.json          # Configuración de Vercel para deploy
+├── .vercelignore        # Archivos a ignorar en Vercel
 ├── package.json         # Dependencias y scripts
 ├── .eslintrc.js         # Configuración de ESLint
 ├── .prettierrc          # Configuración de Prettier
-└── README.md            # Documentación principal
+├── README.md            # Documentación principal
+├── SETUP.md             # Esta guía
+├── VARIABLES.md         # Documentación de variables de entorno
+└── VERCEL_DEPLOY.md     # Guía de deploy en Vercel
 ```
 
 ## 🔄 Flujo de Trabajo Recomendado
