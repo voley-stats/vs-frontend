@@ -155,7 +155,6 @@ npm run build
 vs-frontend/
 ├── .env                 # Variables de entorno (crear, no está en git)
 ├── env.example          # Ejemplo de variables de entorno
-├── config.example.js    # Configuración de ejemplo (legacy)
 ├── vite.config.js       # Configuración de Vite
 ├── tailwind.config.js   # Configuración de Tailwind
 ├── vercel.json          # Configuración de Vercel para deploy
@@ -172,8 +171,8 @@ vs-frontend/
 
 1. **Configurar entorno:**
    ```bash
-   cp config.example.js config.js
-   # Editar config.js con tus valores
+   cp env.example .env
+   # Editar .env con tus valores (especialmente VITE_API_URL)
    ```
 
 2. **Desarrollo:**

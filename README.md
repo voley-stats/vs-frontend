@@ -44,10 +44,9 @@ Una aplicación web moderna para el análisis inteligente de partidos de voleibo
 3. **Configurar variables de entorno:**
    ```bash
    # Copiar archivo de configuración de ejemplo
-   cp config.example.js config.js
+   cp env.example .env
    
-   # O crear archivo .env (recomendado)
-   echo "VITE_API_URL=http://localhost:3001/api" > .env
+   # Editar .env con tus valores (especialmente VITE_API_URL)
    ```
 
 4. **Ejecutar en modo desarrollo:**
