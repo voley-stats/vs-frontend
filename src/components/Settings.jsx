@@ -18,10 +18,7 @@ const Settings = () => {
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    matchAnalysisComplete: true,
-    weeklyReports: true,
-    systemUpdates: false
+    notifications: preferences?.notifications !== undefined ? preferences.notifications : true
   });
 
   const [displaySettings, setDisplaySettings] = useState({
@@ -62,6 +59,15 @@ const Settings = () => {
     }));
   };
 
+  // Cargar preferencias de notificaciones cuando cambien las preferencias
+  useEffect(() => {
+    if (preferences?.notifications !== undefined) {
+      setNotificationSettings({
+        notifications: preferences.notifications
+      });
+    }
+  }, [preferences]);
+
   const handleDisplayChange = (e) => {
     const { name, value } = e.target;
     setDisplaySettings(prev => ({
@@ -96,11 +102,12 @@ const Settings = () => {
     setMessage('');
     
     try {
-      // Aquí iría la lógica para actualizar las notificaciones
-      console.log('Actualizando notificaciones:', notificationSettings);
+      // Actualizar preferencias usando el campo notifications del backend
+      await updatePreferences({ notifications: notificationSettings.notifications });
       setMessage('Configuración de notificaciones actualizada');
     } catch (error) {
-      setMessage('Error al actualizar las notificaciones');
+      console.error('Error actualizando notificaciones:', error);
+      setMessage(error.message || 'Error al actualizar las notificaciones');
     } finally {
       setLoading(false);
     }
@@ -179,70 +186,25 @@ const Settings = () => {
         <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
           <div>
             <h3 className="text-sm font-medium text-slate-900 dark:text-white">Notificaciones por Email</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Recibir notificaciones importantes por correo</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Recibir notificaciones importantes por correo electrónico</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              name="emailNotifications"
-              checked={notificationSettings.emailNotifications}
+              name="notifications"
+              checked={notificationSettings.notifications}
               onChange={handleNotificationChange}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
           </label>
         </div>
+      </div>
 
-        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-          <div>
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white">Análisis Completado</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Notificar cuando se complete el análisis de un partido</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              name="matchAnalysisComplete"
-              checked={notificationSettings.matchAnalysisComplete}
-              onChange={handleNotificationChange}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
-          </label>
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-          <div>
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white">Reportes Semanales</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Recibir resúmenes semanales de estadísticas</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              name="weeklyReports"
-              checked={notificationSettings.weeklyReports}
-              onChange={handleNotificationChange}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
-          </label>
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-          <div>
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white">Actualizaciones del Sistema</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Notificar sobre nuevas características y mejoras</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              name="systemUpdates"
-              checked={notificationSettings.systemUpdates}
-              onChange={handleNotificationChange}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
-          </label>
-        </div>
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          <strong>Nota:</strong> Actualmente solo está disponible la configuración general de notificaciones. Próximamente se podrán configurar tipos específicos de notificaciones.
+        </p>
       </div>
 
       <div className="flex justify-end">
