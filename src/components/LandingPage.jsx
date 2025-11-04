@@ -141,10 +141,10 @@ const LandingPage = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
-                Análisis en Tiempo Real
+                Análisis Near Real Time
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Seguimiento en vivo durante los partidos, estadísticas instantáneas 
+                Seguimiento durante los partidos, estadísticas casi instantáneas 
                 y alertas de rendimiento para ajustes tácticos inmediatos.
               </p>
             </div>
@@ -248,7 +248,7 @@ const LandingPage = () => {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 bg-white dark:bg-gray-dark font-cy-grotesk">
+      <section id="about" className="py-20 bg-white dark:bg-black font-cy-grotesk">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
@@ -300,7 +300,7 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-slate-900 dark:text-white">Resultados Comprobados</h4>
-                    <p className="text-gray-600 dark:text-gray-300">Equipos confían en nosotros</p>
+                    <p className="text-gray-600 dark:text-gray-300">Distintos equipos de la liga argentina confían en nosotros</p>
                   </div>
                 </div>
               </div>
@@ -319,14 +319,6 @@ const LandingPage = () => {
                   la innovación tecnológica para crear la mejor herramienta 
                   de análisis de voleibol del mercado.
                 </p>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-sm text-slate-600 dark:text-slate-300 font-medium">Equipos Activos</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-slate-600 dark:text-slate-300 font-medium">Partidos Analizados</div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -376,7 +368,7 @@ const LandingPage = () => {
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-slate-600 dark:text-slate-300">Hasta 10 jugadores</span>
+                  <span className="text-slate-600 dark:text-slate-300">Gestión de equipos</span>
                 </li>
                 <li className="flex items-center">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -416,12 +408,6 @@ const LandingPage = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-slate-600 dark:text-slate-300">Análisis completo con IA</span>
-                </li>
-                <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-slate-600 dark:text-slate-300">Jugadores ilimitados</span>
                 </li>
                 <li className="flex items-center">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
