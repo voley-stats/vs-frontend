@@ -345,15 +345,18 @@ const LandingPage = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Plan Básico */}
             <div className="bg-white dark:bg-gray-dark p-8 rounded-xl shadow-lg">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Básico</h3>
                 <p className="text-slate-600 dark:text-slate-300 mb-4">Perfecto para equipos pequeños</p>
-                <div className="text-4xl font-bold text-slate-900 dark:text-white">
+                <div className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
                   $29<span className="text-lg text-slate-600 dark:text-slate-300">/mes</span>
                 </div>
+                <p className="text-sm text-green-600 dark:text-green-400 font-semibold">
+                  Primer mes gratis
+                </p>
               </div>
               
               <ul className="space-y-4 mb-8">
@@ -391,73 +394,13 @@ const LandingPage = () => {
               </Link>
             </div>
 
-            {/* Plan Profesional */}
-            <div className="bg-blue-600 text-white p-8 rounded-xl shadow-xl transform scale-105">
-              <div className="text-center mb-8">
-                <div className="inline-block bg-blue-500 text-blue-100 text-sm font-semibold px-3 py-1 rounded-full mb-4">
-                  Más Popular
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Profesional</h3>
-                <p className="text-blue-100 mb-4">Ideal para equipos competitivos</p>
-                <div className="text-4xl font-bold">
-                  $79<span className="text-lg text-blue-200">/mes</span>
-                </div>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-200 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Hasta 20 partidos por mes</span>
-                </li>
-                <li className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-200 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Análisis avanzado con IA</span>
-                </li>
-                <li className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-200 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Hasta 25 jugadores</span>
-                </li>
-                <li className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-200 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Reportes personalizados</span>
-                </li>
-                <li className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-200 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Soporte prioritario</span>
-                </li>
-                <li className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-200 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Integración con sistemas existentes</span>
-                </li>
-              </ul>
-              
-              <Link 
-                to="/register" 
-                className="w-full bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold text-center block hover:bg-blue-50 transition-colors"
-              >
-                Comenzar Prueba Gratis
-              </Link>
-            </div>
-
             {/* Plan Enterprise */}
             <div className="bg-white dark:bg-gray-dark p-8 rounded-xl shadow-lg">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Enterprise</h3>
                 <p className="text-slate-600 dark:text-slate-300 mb-4">Para organizaciones grandes</p>
                 <div className="text-4xl font-bold text-slate-900 dark:text-white">
-                  $199<span className="text-lg text-slate-600 dark:text-slate-300">/mes</span>
+                  $49.99<span className="text-lg text-slate-600 dark:text-slate-300">/mes</span>
                 </div>
               </div>
               
@@ -501,7 +444,7 @@ const LandingPage = () => {
               </ul>
               
               <Link 
-                to="/register" 
+                to="/contact" 
                 className="w-full bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white px-6 py-3 rounded-lg font-semibold text-center block hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
               >
                 Contactar Ventas
