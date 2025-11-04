@@ -40,14 +40,25 @@ const TeamManagement = () => {
         console.log('Categorías cargadas:', data);
         
         // Mapear categorías para la UI
-        const categoriesData = data.categories.map(category => ({
-          id: category.id,
-          name: category.full_name, // "Primera - Masculino"
-          division: category.division,
-          gender: category.gender,
-          members: category.members || [],
-          isFromBackend: true // Marcar que viene del backend
-        }));
+        const categoriesData = data.categories.map(category => {
+          // Capitalizar el género en el nombre completo
+          let formattedName = category.full_name;
+          if (category.full_name && category.gender) {
+            // Reemplazar el género en minúsculas con el género capitalizado
+            const genderLower = category.gender.toLowerCase();
+            const genderCapitalized = category.gender.charAt(0).toUpperCase() + category.gender.slice(1).toLowerCase();
+            formattedName = category.full_name.replace(new RegExp(` - ${genderLower}$`, 'i'), ` - ${genderCapitalized}`);
+          }
+          
+          return {
+            id: category.id,
+            name: formattedName, // "Primera - Masculino" o "Sub 16 - Femenino"
+            division: category.division,
+            gender: category.gender,
+            members: category.members || [],
+            isFromBackend: true // Marcar que viene del backend
+          };
+        });
         
         setTeams(categoriesData);
       } else {
