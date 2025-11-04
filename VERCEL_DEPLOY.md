@@ -6,13 +6,7 @@ Esta guía te ayudará a desplegar el frontend de VoleyStats en Vercel.
 
 - ✅ Cuenta en [Vercel](https://vercel.com)
 - ✅ Repositorio del frontend en GitHub/GitLab/Bitbucket
-- ✅ Backend desplegado (Railway, Render, u otro servicio)
-
-## 🎯 Opción Recomendada: Frontend en Vercel + Backend en Railway/Render
-
-Esta es la configuración recomendada según la documentación del backend:
-- ✅ Frontend en Vercel (mejor rendimiento, CDN global)
-- ✅ Backend en Railway/Render (mantiene toda la funcionalidad de video)
+- ✅ Backend desplegado y funcionando (necesario para que el frontend funcione correctamente)
 
 ## 📝 Pasos para el Deploy
 
@@ -42,10 +36,10 @@ En la sección **Environment Variables** del proyecto en Vercel, agrega:
 
 #### Variable Obligatoria:
 ```
-VITE_API_URL=https://tu-backend.railway.app/api
+VITE_API_URL=https://tu-backend.com/api
 ```
 
-**⚠️ IMPORTANTE**: Reemplaza `https://tu-backend.railway.app/api` con la URL real de tu backend.
+**⚠️ IMPORTANTE**: Reemplaza `https://tu-backend.com/api` con la URL real de tu backend.
 
 #### Variables Opcionales:
 ```
@@ -77,19 +71,9 @@ VITE_API_URL=http://localhost:3001/api
 VITE_DEV_MODE=true
 ```
 
-### 5. Actualizar CORS en el Backend
+### 5. Configurar CORS en el Backend
 
-Asegúrate de que el backend permita el dominio de Vercel. En `src/server.js` del backend:
-
-```javascript
-origin: [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.FRONTEND_URL,
-  'https://tu-app.vercel.app', // ← Agrega tu dominio de Vercel
-  'https://*.vercel.app'        // ← O permite todos los subdominios de Vercel
-].filter(Boolean),
-```
+**Importante**: Asegúrate de que el backend esté configurado para permitir peticiones desde el dominio de Vercel. El backend debe incluir en su configuración CORS el dominio de tu aplicación Vercel.
 
 ### 6. Hacer el Deploy
 

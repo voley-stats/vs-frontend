@@ -165,7 +165,6 @@ vs-frontend/
 ├── .prettierrc          # Configuración de Prettier
 ├── README.md            # Documentación principal
 ├── SETUP.md             # Esta guía
-├── VARIABLES.md         # Documentación de variables de entorno
 └── VERCEL_DEPLOY.md     # Guía de deploy en Vercel
 ```
 

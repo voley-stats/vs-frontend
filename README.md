@@ -181,7 +181,7 @@ La aplicación requiere configurar `VITE_API_URL` en un archivo `.env`:
 VITE_API_URL=http://localhost:3001/api
 ```
 
-Para más detalles, consulta `SETUP.md` o `VARIABLES.md`.
+Para más detalles, consulta `SETUP.md`.
 
 ### Configuración de Desarrollo
 
