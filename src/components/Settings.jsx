@@ -9,6 +9,7 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -26,10 +27,8 @@ const Settings = () => {
   });
 
   const [displaySettings, setDisplaySettings] = useState({
-    theme: preferences?.theme || 'system',
-    language: preferences?.language || 'es',
-    timezone: preferences?.timezone || 'America/Mexico_City',
-    dateFormat: preferences?.dateFormat || 'DD/MM/YYYY'
+    theme: preferences?.theme || 'dark',
+    fontSize: preferences?.fontSize || 'medium'
   });
 
   const tabs = [
@@ -310,53 +309,19 @@ const Settings = () => {
         </div>
 
         <div>
-          <label htmlFor="language" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Idioma
+          <label htmlFor="fontSize" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Tamaño de Fuente
           </label>
           <select
-            id="language"
-            name="language"
-            value={displaySettings.language}
+            id="fontSize"
+            name="fontSize"
+            value={displaySettings.fontSize}
             onChange={handleDisplayChange}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           >
-            <option value="es">Español</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="timezone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Zona Horaria
-          </label>
-          <select
-            id="timezone"
-            name="timezone"
-            value={displaySettings.timezone}
-            onChange={handleDisplayChange}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
-            <option value="America/Mexico_City">México (GMT-6)</option>
-            <option value="America/New_York">Nueva York (GMT-5)</option>
-            <option value="Europe/Madrid">Madrid (GMT+1)</option>
-            <option value="America/Argentina/Buenos_Aires">Buenos Aires (GMT-3)</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="dateFormat" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Formato de Fecha
-          </label>
-          <select
-            id="dateFormat"
-            name="dateFormat"
-            value={displaySettings.dateFormat}
-            onChange={handleDisplayChange}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
-            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            <option value="small">Pequeño</option>
+            <option value="medium">Mediano</option>
+            <option value="large">Grande</option>
           </select>
         </div>
       </div>
@@ -378,14 +343,13 @@ const Settings = () => {
       <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-lg">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Datos Personales</h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-          Tienes control total sobre tus datos personales. Puedes descargar, modificar o eliminar tu información en cualquier momento.
+          Tienes control total sobre tus datos personales. Puedes modificar tu información en cualquier momento.
         </p>
         <div className="flex space-x-4">
-          <button className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
-            <span className="material-symbols-outlined mr-2 text-sm">download</span>
-            Descargar Datos
-          </button>
-          <button className="px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors">
+          <button 
+            onClick={() => setShowDeleteModal(true)}
+            className="px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
+          >
             <span className="material-symbols-outlined mr-2 text-sm">delete</span>
             Eliminar Cuenta
           </button>
@@ -408,6 +372,59 @@ const Settings = () => {
           </label>
         </div>
       </div>
+
+      {/* Modal para Eliminar Cuenta */}
+      {showDeleteModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20">
+                <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">warning</span>
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+                Eliminar Cuenta
+              </h3>
+              {user?.role === 'coach' ? (
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                  Para eliminar tu cuenta de entrenador, por favor contacta con un administrador del sistema.
+                </p>
+              ) : (
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                  ¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.
+                </p>
+              )}
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+                >
+                  Cancelar
+                </button>
+                {user?.role !== 'coach' && (
+                  <button
+                    onClick={() => {
+                      // Aquí iría la lógica para eliminar la cuenta (no implementado en backend)
+                      setShowDeleteModal(false);
+                      setMessage('La eliminación de cuenta no está disponible actualmente');
+                    }}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
