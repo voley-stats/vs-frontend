@@ -58,6 +58,14 @@ const TeamInvitation = () => {
 
       setInvitation(result.invitation);
       setInvitationType(result.invitationType || 'new_user');
+      
+      // Si es usuario nuevo y tenemos el email en la invitación, prellenar el email
+      if (result.invitationType === 'new_user' && result.invitation?.email) {
+        setFormData(prev => ({
+          ...prev,
+          email: result.invitation.email
+        }));
+      }
     } catch (err) {
       setError(err.message || 'Error cargando invitación');
     } finally {
@@ -72,17 +80,10 @@ const TeamInvitation = () => {
     setSuccess('');
 
     try {
-      // Solo validar contraseñas si es usuario nuevo y tiene confirm_password
-      if (invitationType === 'new_user' && formData.confirm_password && formData.password !== formData.confirm_password) {
-        setError('Las contraseñas no coinciden');
-        setLoading(false);
-        return;
-      }
-
       // Validar campos requeridos
       if (invitationType === 'new_user') {
-        if (!formData.email || !formData.full_name || !formData.password) {
-          setError('Todos los campos son requeridos');
+        if (!formData.email || !formData.full_name) {
+          setError('Email y nombre completo son requeridos');
           setLoading(false);
           return;
         }
@@ -98,8 +99,8 @@ const TeamInvitation = () => {
         body: JSON.stringify({
           token: token,
           email: formData.email,
-          full_name: formData.full_name,
-          password: formData.password
+          full_name: formData.full_name
+          // No enviamos password - el backend usará automáticamente invitation.temporary_password
         })
       });
 
@@ -410,7 +411,7 @@ const TeamInvitation = () => {
                       Usuario Nuevo
                     </h3>
                     <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                      <p>Completa tu registro para unirte al equipo. Usa la contraseña temporal del email.</p>
+                      <p>Completa tu registro para unirte al equipo. La contraseña se configurará automáticamente.</p>
                     </div>
                   </div>
                 </div>
@@ -448,21 +449,12 @@ const TeamInvitation = () => {
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Contraseña Temporal (del email)
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  placeholder="Pega la contraseña temporal del email"
-                />
-              </div>
+              {/* Campo de contraseña oculto - se completa automáticamente */}
+              <input
+                type="hidden"
+                name="password"
+                value={formData.password || 'auto_fill_from_backend'}
+              />
             </div>
           ) : (
             // Usuario existente - solo confirmación
