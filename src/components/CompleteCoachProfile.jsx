@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { coachProfileService } from '../services/coachProfileService';
-import VolleyballIcon from './VolleyballIcon';
+import VoleyStatsLogo from './VoleyStatsLogo';
 
 const CompleteCoachProfile = () => {
   const navigate = useNavigate();
@@ -140,8 +140,8 @@ const CompleteCoachProfile = () => {
     <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
       <div className="max-w-2xl w-full space-y-8 p-8">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4">
-            <VolleyballIcon className="w-16 h-16" />
+          <div className="flex justify-center items-center mb-8">
+            <VoleyStatsLogo size="small" />
           </div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
             ¡Bienvenido a VOLEY STATS!
