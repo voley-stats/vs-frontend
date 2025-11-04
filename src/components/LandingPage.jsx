@@ -38,7 +38,7 @@ const LandingPage = () => {
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold text-black dark:text-white mb-6">
               Análisis Profesional de
-              <span className="text-primary"> Vóleibol</span>
+              <span className="text-primary"> Voleibol</span>
             </h1>
             <p className="text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
               Transforma tus partidos de voleibol en datos accionables. 
